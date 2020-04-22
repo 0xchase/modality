@@ -1,0 +1,6 @@
+# Will be configuration things like veritesting here
+Config to discard deadended (still keep track of number though)
+Unicorn option
+arg count
+arg length
+stdin length
