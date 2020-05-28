@@ -1,1 +1,1 @@
-r2 -i r2-angr.py challenges/lockpicksim
+r2 -i plugin.py challenges/lockpicksim

@@ -1,30 +1,32 @@
 import sys
 import claripy
 from termcolor import colored
-#import angr
 
 class Debugger():
-    def __init__(self, f):
-        self.functions = f
-        self.watchpoints = {}
-    
-    def initialize(self, main, f):
-        global functions
-        functions = f
+    watchpoints = {}
 
+    def __init__(self):
+        pass
+
+    # Continues execution
     def debug_continue(self):
-        self.simgr.run()
+        self.r2angr.simgr.run()
 
+    # Steps execution 
     def debug_step(self):
-        if len(self.command) == 1:
-            print("Single step")
-            self.simgr.step()
+        if len(self.r2angr.command) == 1:
+            self.r2angr.simgr.step()
         else:
-            num = int(self.command[1])
-            print("Multi step")
-            for i in range(0, num):
-                self.simgr.step()
+            try:
+                num = int(self.command[1])
+            except:
+                print("Usage: mcs <step count>")
+                return
 
+            for i in range(0, num):
+                self.r2angr.simgr.step()
+
+    # NOT IMPLEMENTED
     def debug_function(self):
         print("Running function")
         f = self.project.factory.callable(int(self.command[1], 16))
@@ -54,23 +56,60 @@ class Debugger():
         print("")
         print(colored("Return value: " + str(f.result_state.regs.rax), "yellow"))
         print(colored("Return concrete: " + str(f.result_state.regs.rax.concrete), "green"))
-        
+
 
     def restore_state(self, simgr1):
         simgr1.active = self.active_backup
         simgr1.deadended = self.deadended_backup
 
-    # CURRENTLY BROKEN
+    # Explores using find/avoid addresses
+    def debug_explore(self):
+        r2p = self.r2angr.r2p
+        find = []
+        avoid = []
+
+        comments = r2p.cmdj("CCj")
+        for comment in comments:
+            if comment["name"] == "find":
+                find.append(comment["offset"])
+            if comment["name"] == "avoid":
+                avoid.append(comment["offset"])
+
+        if len(find) == 0:
+            print(colored("Requires at least one find comment", "yellow"))
+            return
+
+        f_str = ""
+        for a in find:
+            f_str += colored(hex(a), "green") + colored(", ", "yellow")
+        f_str = f_str[:-6]
+
+        a_str = ""
+        for a in avoid:
+            a_str += colored(hex(a), "red") + colored(", ", "yellow")
+        a_str = a_str[:-6]
+
+        print(colored("Starting exploration.\nFind: [", "yellow") + f_str + colored("]. Avoid: [", "yellow") + a_str + colored("].", "yellow"))
+
+        self.r2angr.simgr.explore(find=find, avoid=avoid).unstash(from_stash="found", to_stash="active")
+
+        if self.r2angr.simgr.active:
+            self.print_explore()
+        else:
+            print(colored("Exploration failed", "red"))
+
+    # NOT IMPLEMENTED
     def debug_explore_stdout(self):
         print("Exploring until stdout " + self.command[1])
         self.simgr.explore(find=lambda s: self.command[1].strip().encode() in s.posix.dumps(1)).unstash(from_stash="found", to_stash="active")
 
+    # NOT IMPLEMENTED
     def debug_explore_until_dfs(self):
         print("Exploring using DFS")
         command = self.command
         simgr = self.simgr
         simgr.use_technique(self.angr.exploration_techniques.dfs.DFS())
-        
+
         old_active = []
         old_deadended = []
 
@@ -106,46 +145,23 @@ class Debugger():
             for state in old_deadended:
                 simgr.deadended.append(state)
 
-    def debug_print(self):
-        print("[" + "-"*30 + "registers" + "-"*30 + "]")
-        print("RAX: " + str(self.simgr.active[0].regs.rax))
-        print("RAX: " + str(self.simgr.active[0].regs.rax))
-        print("RAX: " + str(self.simgr.active[0].regs.rax))
-        print("RAX: " + str(self.simgr.active[0].regs.rax))
-        print("RAX: " + str(self.simgr.active[0].regs.rax))
-        print("RAX: " + str(self.simgr.active[0].regs.rax))
-        print("RAX: " + str(self.simgr.active[0].regs.rax))
-        print("RAX: " + str(self.simgr.active[0].regs.rax))
-        print("RAX: " + str(self.simgr.active[0].regs.rax))
-        print("[" + "-"*30 + "code" + "-"*30 + "]")
-        print("some code here")
-        print("[" + "-"*30 + "stack" + "-"*30 + "]")
-        print("the stack here")
-        print("[" + "-"*30 + "stack" + "-"*30 + "]")
-        print("[" + "-"*30 + "    " + "-"*30 + "]")
-
     def debug_explore_until(self):
-        print("Exploring until...")
-        command = self.session.command
-        simgr = self.session.simgr
-        
-        self.active_backup = simgr.active.copy()
-        self.deadended_backup = simgr.deadended.copy()
+        command = self.r2angr.command
+        simgr = self.r2angr.simgr
 
-        if "0x" in command[1]:
-            addr = int(command[1], 16)
-        else:
-            addr = int(self.symbol_to_address(command[1]), 16)
 
-        print("Debug explore until " + hex(addr))
-        simgr.explore(find=addr).unstash(from_stash="found", to_stash="active")
+        try:
+            addr = self.get_addr(command[1])
+        except:
+            print(colored(str(command[1]) + " not found", "yellow"))
+            return
 
-        if simgr.active:
-            print(colored("Found " + str(len(simgr.active)) + " solutions", "green"))
+        simgr.explore(find=addr)
+
+        if simgr.found:
+            self.print_explore()
         else:
             print(colored("Exploration failed, use der to restore", "red"))
-
-        self.session.r2p.cmd("s " + hex(addr))
 
     def debug_explore_revert(self):
         print("Restoring state")
@@ -155,7 +171,7 @@ class Debugger():
     def debug_explore_until_loop(self):
         command = self.command
         simgr = self.simgr
-        
+
         self.save_state(simgr)
         temp_project = self.angr.Project(self.filename, auto_load_libs=False)
 
@@ -179,7 +195,7 @@ class Debugger():
     def debug_explore_loop(self):
         command = self.command
         simgr = self.simgr
-        
+
         old_active = []
         old_deadended = []
 
@@ -200,7 +216,7 @@ class Debugger():
             functions.append(cfg_fast.functions[a])
 
         loops = temp_project.analyses.LoopFinder(functions=functions).loops
-        
+
         simgr.use_technique(self.angr.exploration_techniques.loop_seer.LoopSeer(cfg=cfg_fast, functions=functions, loops=loops, use_header=False, bound=None, bound_reached=None, discard_stash='deadended'))
         #analysis = temp_project.analyses.LoopAnalysis(loop_finder.loops[0], None)
         #print(str(analysis))
@@ -240,8 +256,8 @@ class Debugger():
         addr = state.solver.eval(state.regs.rip)
         hit_count, message = self.watchpoints[addr]
         self.watchpoints[addr] = (hit_count + 1, message)
-        
-        if message == "":    
+
+        if message == "":
             data = colored(" [" + str(len(self.simgr.active)) + "|" + colored(str(len(self.simgr.deadended)), "red") + colored("]", "yellow"), "yellow"), colored("{Hit count: " + str(hit_count) + "}", "cyan"), " Reached watchpoint at " + hex(addr)
             state.history_arr.append(data)
             print(data)
@@ -301,7 +317,7 @@ class Debugger():
         addr = state.solver.eval(state.regs.rip)
         simgr = self.simgr
         merge_count = 0
-        
+
         i = 0
         j = len(simgr.active)
         while len(simgr.active) > 1 and i < 30:
@@ -337,13 +353,21 @@ class Debugger():
             print("Found " + str(len(simgr.active)) + " solutions")
         else:
             print("Exploration failed")
-        
-        
-    
+
+
+
     def debug_continue_until(self):
-        print("Debug continue until " + self.command[1])
-        #self.simgr.run(until=lambda sm: state.addr == int(self.command[1], 16) for state in sm.active) 
-        print("Unimplemented")
+        simgr = self.r2angr.simgr
+
+        try:
+            addr = get_addr(self.r2angr.command[1])
+            print(str(addr))
+        except:
+            print(colored("Usage: mcu <address|symbol>", "yellow"))
+            return
+
+        while len(simgr.active) > 0 and simgr.active[0].addr != addr:
+            simgr.step()
 
     def debug_continue_output(self):
         print("Debug continue until output")
@@ -359,17 +383,11 @@ class Debugger():
         except:
             print(str(output))
 
-    def debug_continue_until_call(self):
-        print("Debug continue until self, main")
-        state.inspect.b("call")
-        #simgr.run(until=lambda sm: sm.active[0].addr == 0x400815)
-        self.simgr.run()
-
     def debug_continue_until_branch(self):
         print("Continuing until branch")
-        while len(self.session.simgr.active) == 1:
-            self.session.simgr.step()
-        
+        while len(self.r2angr.simgr.active) == 1:
+            self.r2angr.simgr.step()
+
 
     def debug_continue_until_ret(self):
         print("Debug continue until ret")
@@ -379,22 +397,22 @@ class Debugger():
         print("Debug continue until call")
         self.simgr.run()
 
+    def print_explore(self):
+        print(colored("Found " + str(len(self.r2angr.simgr.found)) + " solutions", "green"))
 
-    def debug_initialize(self):
-        command = self.command
-        simgr = self.simgr
-        if len(command) == 1:
-            print("Initializing at entry state")
-            state = self.project.factory.entry_state()
-            simgr = self.project.factory.simgr(state)
+    def get_addr(self, s):
+        if self.r2angr.r2p.cmd("afl") != "":
+            functions = self.r2angr.r2p.cmdj("aflj")
         else:
-            print("Initializing blank state at " + command[1])
+            functions = None
 
-            state = self.project.factory.blank_state(addr=int(command[1],16))
-            simgr = self.project.factory.simgr(state)
+        if functions != None:
+            for f in functions:
+                if f["name"] == s:
+                    return f["offset"]
 
-    def symbol_to_address(self, s):
-        for f in self.session.r2p.cmdj("aflj"):
-            if f["name"] == s:
-                return hex(f["offset"])
+        if "0x" in str(s):
+            return int(s, 16)
+        else:
+            return int(s)
 

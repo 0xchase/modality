@@ -2,7 +2,7 @@
 # Copyright (C) 2017 Chase Kanipe
 
 """
-r2-angr
+r2angr
 """
 
 import r2lang
@@ -31,27 +31,26 @@ def r2angr(_):
         if not command.startswith("m"):
             return 0
 
-        if command == "mi":
+        if not initialized:
             sys.path.append("src/")
             try:
-                from session import Session
-                session = Session(binary, r)
+                from r2angr import R2ANGR
+                session = R2ANGR(binary, r)
                 initialized = True
             except Exception as e:
                 print(e)
-        else:
-            try:
-                if initialized:
-                    session.run(command[1:])
-                else:
-                    print("r2angr not initialized")
-            except Exception as e:
-                print(e)
+        try:
+            session.run(command[1:])
+        except Exception as e:
+            print(e)
 
         # Parse arguments
         #tmp = command.split(" ")
         #print(str(tmp))
-        return 1
+        try:
+            return session.return_value
+        except:
+            return 1
 
     return {"name": "r2-angr",
             "licence": "GPLv3",
