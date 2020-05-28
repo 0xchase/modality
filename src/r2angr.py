@@ -7,6 +7,7 @@ from printer import *
 from hooks import *
 from util import *
 from analysis import *
+from watcher import *
 
 # Add command to access old mounting commands
 # Add all old commands. Go through each, making sure it works. Make commands robust.
@@ -35,6 +36,8 @@ class R2ANGR():
 
     debugger = Debugger()
     stash = Stash()
+    watcher = Watcher()
+
     return_value = ""
 
     commands = [
@@ -44,9 +47,9 @@ class R2ANGR():
             ("i", None,                                     "i" + colored("[?]              ", "yellow") + colored("Initialize at entry point", "green")),
             ("s", stash.list,                  "s" + colored("[?]              ", "yellow") + colored("States list", "green")),
 
-            ("cs", debugger.debug_step,           "cu" + colored(" <addr>         ", "yellow") + colored("Continue emulation until address", "green")),
+            ("cs", debugger.debug_step,           "cs" + colored(" <addr>         ", "yellow") + colored("Continue emulation one step", "green")),
             ("cu", debugger.debug_continue_until,           "cu" + colored(" <addr>         ", "yellow") + colored("Continue emulation until address", "green")),
-            ("cb", debugger.debug_step,    "cb                " + colored("Continue emulation one basic block", "green")),
+            ("cb", debugger.debug_continue_until_branch,    "cb                " + colored("Continue emulation until branch", "green")),
             ("co", debugger.debug_continue_output,          "co                " + colored("Continue emulation until output", "green")),
 
             ("eu", debugger.debug_explore_until,            "eu" + colored(" <addr>         ", "yellow") + colored("Explore until address", "green")),
@@ -55,6 +58,8 @@ class R2ANGR():
             ("sk", stash.kill,                              "sk"+colored(" <index>        ", "yellow") + colored("Kill state by index", "green")),
             ("sr", stash.revive,                              "sr"+colored(" <index>        ", "yellow") + colored("Kill state by index", "green")),
             ("ss", stash.save,                              "ss"+colored(" <index>        ", "yellow") + colored("Save only this state by index", "green")),
+
+            ("w", watcher.add_watchpoint,                              "w"+colored(" <index>        ", "yellow") + colored("Save only this state by index", "green")),
     ]
 
     def initialize2(self):
@@ -84,6 +89,7 @@ class R2ANGR():
         self.command = command
         self.debugger.r2angr = self
         self.stash.r2angr = self
+        self.watcher.r2angr = self
 
         found = False
         for c, f, h in self.commands:
@@ -97,7 +103,8 @@ class R2ANGR():
                         pass
                     self.return_value = ""
                     f()
-                    self.update_highlight()
+                    if not c == "s" and not c == "sl":
+                        self.update_highlight()
                 found = True
         if not found or "?" in command:
             self.help(command)
@@ -114,17 +121,35 @@ class R2ANGR():
             if "r2angr" in comment["name"]:
                 self.r2p.cmd("CC- @ " + hex(comment["offset"]))
                 self.r2p.cmd("ecH- @ " + hex(comment["offset"]))
+
+        i = 0
+        for state in self.simgr.deadended:
+            print(hex(state.addr))
+            self.r2p.cmd("ecHi red @ " + hex(state.addr))
+            self.r2p.cmd("CC- @ " + hex(state.addr))
+            self.r2p.cmd("CC+r2angr \"deadended\" state " + str(i) + " @ " + hex(state.addr))
+            if not "invalid" in self.r2p.cmd("pd 2 @ " + hex(state.addr)):
+                self.r2p.cmd("s " + hex(state.addr))
+            i += 1
+
+        i = 0
         for state in self.simgr.active:
             print(hex(state.addr))
-            self.r2p.cmd("ecHi cyan @ " + hex(state.addr))
+            self.r2p.cmd("ecHi blue @ " + hex(state.addr))
             self.r2p.cmd("CC- @ " + hex(state.addr))
-            self.r2p.cmd("CC+r2angr active @ " + hex(state.addr))
-            self.r2p.cmd("s " + hex(state.addr))
+            self.r2p.cmd("CC+r2angr \"active\" state " + str(i) + " @ " + hex(state.addr))
+            if not "invalid" in self.r2p.cmd("pd 2 @ " + hex(state.addr)):
+                self.r2p.cmd("s " + hex(state.addr))
+            i += 1
+
+        i = 0
         for state in self.simgr.found:
             print(hex(state.addr))
             self.r2p.cmd("ecHi green @ " + hex(state.addr))
             self.r2p.cmd("CC- @ " + hex(state.addr))
-            self.r2p.cmd("CC+r2angr found @ " + hex(state.addr))
-            self.r2p.cmd("s " + hex(state.addr))
+            self.r2p.cmd("CC+r2angr \"found\" state " + str(i) + " @ " + hex(state.addr))
+            if not "invalid" in self.r2p.cmd("pd 2 @ " + hex(state.addr)):
+                self.r2p.cmd("s " + hex(state.addr))
+            i += 1
         self.r2p.cmd("r")
 

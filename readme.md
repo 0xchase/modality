@@ -18,10 +18,27 @@ Change printing format to have [DEBUG] [PRINT] [HOOK] etc
 Detect path explosion
 If path explosion detected, do one more loop to check where split occurs, print that instruction and address
 
+## Priority
+ - Watchpoints
+ - Analysis commands for loops, functions, etc
+ - If enabled, replace commands like `dr` with symbolic information
+
+## Bugs
+ - State revive/save doesn't work
+
+---
+
 ## Debugger
- - Add avoid commands
+ - Add avoid/find annotation commands
+ - Add find stages commands
  - der command broken
  - PEDA like view for debugging. Commands to print regs and stack
+ - Single line states printing for loop exploring
+ - Add logging events throughout, command to print this information. Can annotate graph with log.
+ - Debug function, finding args for specific return value
+ - Switch between concrete and symbolic execution
+ - Detailed register/stack printing information for specific state
+ - Improve watchpoint print message
 
 ## Hooks
  - When hooking function calls, print args

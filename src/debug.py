@@ -26,7 +26,6 @@ class Debugger():
             for i in range(0, num):
                 self.r2angr.simgr.step()
 
-    # NOT IMPLEMENTED
     def debug_function(self):
         print("Running function")
         f = self.project.factory.callable(int(self.command[1], 16))
@@ -98,12 +97,10 @@ class Debugger():
         else:
             print(colored("Exploration failed", "red"))
 
-    # NOT IMPLEMENTED
     def debug_explore_stdout(self):
         print("Exploring until stdout " + self.command[1])
         self.simgr.explore(find=lambda s: self.command[1].strip().encode() in s.posix.dumps(1)).unstash(from_stash="found", to_stash="active")
 
-    # NOT IMPLEMENTED
     def debug_explore_until_dfs(self):
         print("Exploring using DFS")
         command = self.command
@@ -145,6 +142,7 @@ class Debugger():
             for state in old_deadended:
                 simgr.deadended.append(state)
 
+    # Explore until a certain address
     def debug_explore_until(self):
         command = self.r2angr.command
         simgr = self.r2angr.simgr
@@ -276,43 +274,6 @@ class Debugger():
         else:
             self.watchpoints[addr] = (0, "")
 
-    def debug_registers(self):
-        for state in self.simgr.active:
-            print("State at " + str(state.regs.rip) + ":")
-            if len(str(state.regs.rax)) < 50:
-                print("  rax = " + str(state.regs.rax))
-            else:
-                print("  rax = <symbolic value>")
-            if len(str(state.regs.rbx)) < 50:
-                print("  rbx = " + str(state.regs.rbx))
-            else:
-                print("  rbx = <symbolic value>")
-            if len(str(state.regs.rcx)) < 50:
-                print("  rcx = " + str(state.regs.rcx))
-            else:
-                print("  rcx = <symbolic value>")
-            if len(str(state.regs.rdx)) < 50:
-                print("  rdx = " + str(state.regs.rdx))
-            else:
-                print("  rdx = <symbolic value>")
-            if len(str(state.regs.rsi)) < 50:
-                print("  rsi = " + str(state.regs.rsi))
-            else:
-                print("  rsi = <symbolic value>")
-            if len(str(state.regs.rdi)) < 50:
-                print("  rdi = " + str(state.regs.rdi))
-            else:
-                print("  rdi = <symbolic value>")
-            if len(str(state.regs.rsp)) < 50:
-                print("  rsp = " + str(state.regs.rsp))
-            else:
-                print("  rsp = <symbolic value>")
-            if len(str(state.regs.rbp)) < 50:
-                print("  rbp = " + str(state.regs.rbp))
-            else:
-                print("  rbp = <symbolic value>")
-
-
     def hook_mergepoint(self, state):
         addr = state.solver.eval(state.regs.rip)
         simgr = self.simgr
@@ -369,23 +330,35 @@ class Debugger():
         while len(simgr.active) > 0 and simgr.active[0].addr != addr:
             simgr.step()
 
+    # Continue emulation until new data in stdout
     def debug_continue_output(self):
         print("Debug continue until output")
-        output = self.simgr.active[0].posix.dumps(1)
-        try:
-            self.simgr.run(until=lambda sm: sm.active[0].posix.dumps(1) != output)
-        except:
-            print("Deadended")
+        output = self.r2angr.simgr.active[0].posix.dumps(1)
+        output = []
 
-        output = self.simgr.active[0].posix.dumps(1)
-        try:
-            print(output.decode())
-        except:
-            print(str(output))
+        for state in self.r2angr.simgr.active:
+            output.append(state.posix.dumps(1))
+        
+        stdout = ""
+        cont = True
+        while cont:
+            self.r2angr.simgr.step()
+            for i in range(0, len(output)):
+                if output[i] != self.r2angr.simgr.active[i].posix.dumps(1):
+                    cont = False
+                    stdout = self.r2angr.simgr.active[i].posix.dumps(1)
 
+        try:
+            print(stdout.decode())
+        except:
+            print(str(stdout))
+
+    # Continue emulation until a branch
     def debug_continue_until_branch(self):
         print("Continuing until branch")
-        while len(self.r2angr.simgr.active) == 1:
+
+        current = len(self.r2angr.simgr.active)
+        while len(self.r2angr.simgr.active) <= current and len(self.r2angr.simgr.active) > 0:
             self.r2angr.simgr.step()
 
 
@@ -396,9 +369,6 @@ class Debugger():
     def debug_continue_until_call(self):
         print("Debug continue until call")
         self.simgr.run()
-
-    def print_explore(self):
-        print(colored("Found " + str(len(self.r2angr.simgr.found)) + " solutions", "green"))
 
     def get_addr(self, s):
         if self.r2angr.r2p.cmd("afl") != "":
@@ -416,3 +386,5 @@ class Debugger():
         else:
             return int(s)
 
+    def print_explore(self):
+        print(colored("Found " + str(len(self.r2angr.simgr.found)) + " solutions", "green"))
