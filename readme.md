@@ -49,6 +49,7 @@ This project is in it's early stages and will only work on some binaries.
 
 ### Other
  - [ ] Deal with offets for PIE
+ - [ ] Commands to edit config.txt file
  - [ ] Integrate ghidra with the disassembler
  - [ ] Watchpoint comment hit count doesn't work
  - [ ] Watchpoint hits should work per state
