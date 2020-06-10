@@ -2,9 +2,9 @@
 
 This project is in it's early stages and will only work on some binaries.
 
-# Todo
+## Todo
 
-## Emulation
+### Emulation
  - [x] Basic initialization: `mi`
  - [ ] Initialize at arbitrary memory location
  - [ ] Initialize on function with current debugger args, specific args, or symbolic args
@@ -17,10 +17,10 @@ This project is in it's early stages and will only work on some binaries.
  - [ ] More watchpoint commands (remove watchpoints, run command at watchpoints)
  - [ ] Switch between concrete and symbolic execution
 
-## Analysis
+### Analysis
  - [ ] Analysis commands for loops, functions, etc
 
-## Stash manipulation
+### Stash manipulation
  - [x] Basic state manipulation: `ms`, `msl`, `msk`, `msr`, `mse`, `mss`
  - [x] Group state operations: `mska`, `msra`
  - [ ] Kill/revive based on output
@@ -28,7 +28,7 @@ This project is in it's early stages and will only work on some binaries.
  - [ ] States outputs and inputs
  - [ ] Print more detailed state information (current function, ...)
 
-## Visualization
+### Visualization
  - [ ] Finalize found/active highlighting and stashing
  - [ ] Implement custom radare2 panels view for exploration
  - [ ] Print log of a state history
@@ -38,16 +38,16 @@ This project is in it's early stages and will only work on some binaries.
  - [ ] Command to print detailed info about state at current address. Can be used with visual panels mode.
  - [ ] Annotate graph with state split locations
 
-## Exploitation
+### Exploitation
  - [ ] Figure out features
 
-## Hooks
+### Hooks
  - [ ] When hooking function calls, print args
  - [ ] Print function return values
  - [ ] Command to add hooks at locations, run some r2 command there
  - [ ] When state splits, print [1|2] => [1|3] with split address
 
-## Other
+### Other
  - [ ] Deal with offets for PIE
  - [ ] Integrate ghidra with the disassembler
  - [ ] Watchpoint comment hit count doesn't work
