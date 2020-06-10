@@ -2,7 +2,21 @@
 
 This project is in it's early stages and will only work on some binaries.
 
+---
+
 ## Todo
+
+### Priority
+ - Major analysis commands
+ - New printing format
+ - Misc easy to implement commands
+ - Get installation working
+ - Wiki and tutorial
+ - Short tool overview
+ - Long tutorial video
+ - Bug fixes, make commands more robust
+
+---
 
 ### Emulation
  - [x] Basic initialization: `mi`
