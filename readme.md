@@ -28,6 +28,10 @@ This project is in it's early stages and will only work on some binaries.
  - [ ] States outputs and inputs
  - [ ] Print more detailed state information (current function, ...)
 
+### Symbolize commands
+ - [ ] Commands to symbolize registers or stack values with different data types
+ - [ ] Commands to symbolize variables
+
 ### Visualization
  - [ ] Finalize found/active highlighting and stashing
  - [ ] Implement custom radare2 panels view for exploration
