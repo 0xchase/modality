@@ -90,10 +90,12 @@ class Debugger():
 
         print(colored("Starting exploration.\nFind: [", "yellow") + f_str + colored("]. Avoid: [", "yellow") + a_str + colored("].", "yellow"))
 
-        self.r2angr.simgr.explore(find=find, avoid=avoid).unstash(from_stash="found", to_stash="active")
+        self.r2angr.simgr.explore(find=find, avoid=avoid)
+
 
         if self.r2angr.simgr.active:
             self.print_explore()
+            self.r2angr.simgr.unstash(from_stash="found", to_stash="active")
         else:
             print(colored("Exploration failed", "red"))
 
@@ -158,8 +160,10 @@ class Debugger():
 
         if simgr.found:
             self.print_explore()
+            simgr.unstash(from_stash="found", to_stash="active")
         else:
             print(colored("Exploration failed, use der to restore", "red"))
+
 
     def debug_explore_revert(self):
         print("Restoring state")

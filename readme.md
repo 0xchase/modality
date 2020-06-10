@@ -10,8 +10,10 @@ This project is in it's early stages and will only work on some binaries.
  - Major analysis commands
  - New printing format
  - Misc easy to implement commands
+ - Get basic scripting working
  - Get installation working
  - Wiki and tutorial
+ - Visual mode auto refresh
  - Short tool overview
  - Long tutorial video
  - Bug fixes, make commands more robust
@@ -33,6 +35,7 @@ This project is in it's early stages and will only work on some binaries.
 
 ### Analysis
  - [ ] Analysis commands for loops, functions, etc
+ - [ ] Move analysis commands to the hook clasification
 
 ### Stash manipulation
  - [x] Basic state manipulation: `ms`, `msl`, `msk`, `msr`, `mse`, `mss`
@@ -48,6 +51,7 @@ This project is in it's early stages and will only work on some binaries.
 
 ### Visualization
  - [ ] Finalize found/active highlighting and stashing
+ - [ ] Indent all printing according to call/loop hierarchy
  - [ ] Implement custom radare2 panels view for exploration
  - [ ] Print log of a state history
  - [ ] If enabled, replace commands like `dr` with symbolic information
@@ -64,6 +68,7 @@ This project is in it's early stages and will only work on some binaries.
  - [ ] Print function return values
  - [ ] Command to add hooks at locations, run some r2 command there
  - [ ] When state splits, print [1|2] => [1|3] with split address
+ - [ ] Add custom hooks for strlen, etc that ask for length or arbitrary length. Can also set this in the config.
 
 ### Other
  - [ ] Deal with offets for PIE

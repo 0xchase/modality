@@ -8,33 +8,25 @@ class Stash():
     def kill(self):
         command = self.r2angr.command
         simgr = self.r2angr.simgr
+        addr = 0
+
         if "0x" in command[1]:
             addr = int(command[1], 16)
-            simgr.move(from_stash='active', to_stash='deadended', filter_func=lambda s: s.addr == addr)
         else:
-            num = int(command[1])
-            simgr.deadended.append(simgr.active[num])
-            simgr.active.remove(simgr.active[num])
+            addr = simgr.active[int(command[1])].addr
 
-    def drop(main, command, simgr):
-        print("Dropping deadended stash")
-        simgr.drop(stash="deadended")
-            
+        simgr.move(from_stash='active', to_stash='deadended', filter_func=lambda s: s.addr == addr)
+
     def extract(self):
         simgr = self.r2angr.simgr
         command = self.r2angr.command
+        addr = 0
 
         if "0x" in command[1]:
             addr = int(command[1], 16)
-            simgr.move(from_stash='active', to_stash='deadended', filter_func=lambda s: s.addr != addr)
         else:
-            num = int(command[1])
-            temp = simgr.active[num]
-            for s in simgr.active:
-                simgr.deadended.append(s)
-            simgr.active = []
-            simgr.active.append(temp)
-            simgr.deadended.remove(temp)
+            addr = simgr.active[int(command[1])].addr
+        simgr.move(from_stash='active', to_stash='deadended', filter_func=lambda s: s.addr != addr)
 
     def seek(self):
         command = self.r2angr.command
@@ -48,14 +40,17 @@ class Stash():
             temp = simgr.active[num]
             self.r2angr.r2p.cmd("s " + hex(temp.addr))
 
-    # Make it work with indexes
     def revive(self):
         command = self.r2angr.command
         simgr = self.r2angr.simgr
+        addr = 0
 
         if "0x" in command[1]:
             addr = int(command[1], 16)
-            simgr.move(from_stash='deadended', to_stash='active', filter_func=lambda s: s.addr == addr)
+        else:
+            addr = simgr.deadended[int(command[1])].addr
+
+        simgr.move(from_stash='deadended', to_stash='active', filter_func=lambda s: s.addr == addr)
 
     def list(self):
         table = []
@@ -79,12 +74,8 @@ class Stash():
             self.print_return("")
 
     def revive_all(self):
-        command = self.r2angr.command
         simgr = self.r2angr.simgr
-
-        for state in simgr.deadended:
-            simgr.active.append(state)
-        simgr.deadended = []
+        simgr.move(from_stash='deadended', to_stash='active', filter_func=lambda s: True)
 
     def revive_stdout(main, command, simgr):
         if len(command) > 1:
@@ -110,14 +101,7 @@ class Stash():
 
     def kill_all(self):
         simgr = self.r2angr.simgr
-
-        while 0 < len(simgr.active):
-            state = simgr.active[0]
-            simgr.deadended.append(state)
-            simgr.active.remove(state)
-
-    def auto_kill_stdout(main, command, simgr):
-        print("Auto killing states with output")
+        simgr.move(from_stash='active', to_stash='deadended', filter_func=lambda s: True)
 
     # ========== Utilities ========== #
 

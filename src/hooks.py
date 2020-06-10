@@ -1,3 +1,4 @@
+from termcolor import colored
 
 #project.hook(0x8048d7b, angr.SIM_PROCEDURES["libc"]["strcmp"]())
 #project.hook(0x8048d3b, angr.SIM_PROCEDURES["libc"]["strlen"]())
@@ -6,32 +7,47 @@
 #state.inspect.b("return", hit_return)
 
 class Hooks():
-    loops_visited = {}
-    loop_entry_addrs = []
-    loop_exit_addrs = []
-    discard_deadended = False
+    def print_analysis(self, s):
+        print(colored("[", "yellow") + colored("Hook", "yellow") + colored("] ", "yellow") + s)
 
+    def aaa(self):
+        print("Function call, loops, and memory r/w analysis")
+
+        #for state in self.simgr.active:
+        #    print("Adding read hooks to state")
+        #    state.inspect.b("mem_read", when=self.angr.BP_AFTER, action=self.hook_read)
+        for state in self.simgr.active:
+            print("Adding split hooks to state")
+            state.inspect.b("fork", when=self.angr.BP_AFTER, action=self.hook_fork)
+            #state.inspect.b("return", when=self.angr.BP_AFTER, action=self.hook_return)
+
+        #for state in self.simgr.active:
+        #    print("Adding exit hooks to state")
+        #    state.inspect.b("exit", when=self.angr.BP_AFTER, action=self.hook_exit)
+
+
+    def hook_functions(self):
+        for func in self.r2angr.r2p.cmdj("aflj"):
+            if ".imp." in func["name"]:
+                self.print_analysis("Hooking import: " + colored(func["name"], "green") + " at " + hex(func["offset"]))
+                self.r2angr.project.hook(func["offset"], self.library_function_hook)
+            else:
+                self.print_analysis("Hooking function: " + colored(func["name"], "green") + " at " + hex(func["offset"]))
+                self.r2angr.project.hook(func["offset"], self.function_hook)
 
     def function_hook(self, state):
         name = "function"
-        for addr, func in self.functions:
-            if int(addr, 16) == state.addr:
-                name = func
-        print(self.colored("Called " + name, "green"))
+        for func in self.r2angr.r2p.cmdj("aflj"):
+            if func["offset"] == state.addr:
+                name = func["name"]
+        self.print_analysis(colored("Called " + name, "green"))
 
     def library_function_hook(self, state):
         name = "function"
-        for addr, func in self.library_functions:
-            if int(addr, 16) == state.addr:
-                name = func
-        print(self.colored("Called " + name, "green"))
-
-    def setup_functions(self):
-        for addr, func in self.functions:
-            self.project.hook(int(addr, 16), self.function_hook)
-
-        for addr, func in self.library_functions:
-            self.project.hook(int(addr, 16), self.library_function_hook)
+        for func in self.r2angr.r2p.cmdj("aflj"):
+            if func["offset"] == state.addr:
+                name = func["name"]
+        self.print_analysis(colored("Called " + name, "green"))
 
     def print_disass_data(self, s, state):
         if "rbp" in s:
@@ -43,13 +59,15 @@ class Hooks():
         else:
             return s
 
+    loops_visited = {}
+    loop_entry_addrs = []
+    loop_exit_addrs = []
+
     def loop_hook(self, state):
-        simgr = self.simgr
+        simgr = self.r2angr.simgr
         loops_visited = self.loops_visited
         count = loops_visited[state.addr]
-        block = self.project.factory.block(state.addr)
-        if self.discard_deadended:
-            simgr.deadended = []
+        block = self.r2angr.project.factory.block(state.addr)
         #block.pp()
 
         cmp_m = block.capstone.insns[0].mnemonic
@@ -59,20 +77,16 @@ class Hooks():
         if "cmp" in cmp_m:
             cmp_str = "[cmp " + self.print_disass_data(cmp_op[0], state) + ", " + self.print_disass_data(cmp_op[1], state) + "]"
         if count == 0:
-            print(self.colored("Starting loop at " + hex(state.addr), "yellow"))
+            print(colored("Starting loop at " + hex(state.addr), "yellow"))
         else:
-            print(self.colored(" [" + str(len(simgr.active)) + "|" + self.colored(str(len(simgr.deadended)), "red") + self.colored("]", "yellow"), "yellow"), self.colored("{Loop count: " + str(loops_visited[state.addr]) + "}", "cyan"), " Looping at " + hex(state.addr) + " " + cmp_str)
+            print(colored(" [" + str(len(simgr.active)) + "|" + colored(str(len(simgr.deadended)), "red") + colored("]", "yellow"), "yellow"), colored("{Loop count: " + str(loops_visited[state.addr]) + "}", "cyan"), " Looping at " + hex(state.addr) + " " + cmp_str)
         loops_visited[state.addr] += 1
 
-    def setup_loops(self, angr, project, simgr, filename,colored):
-        self.colored = colored
-        self.simgr = simgr
-        self.project = project
+    def hook_loops(self):
+        fast_project = self.r2angr.fast_project
+        simgr = self.r2angr.simgr
 
-        temp_project = angr.Project(filename, auto_load_libs=False)
-        #return
-        cfg_fast = temp_project.analyses.CFGFast()
-        self.fast_project = temp_project
+        cfg_fast = fast_project.analyses.CFGFast()
 
         addrs = []
         for f in cfg_fast.functions:
@@ -82,12 +96,25 @@ class Hooks():
         for a in addrs:
             functions.append(cfg_fast.functions[a])
 
-        loops = temp_project.analyses.LoopFinder(functions=functions).loops
+        loops = fast_project.analyses.LoopFinder(functions=functions).loops
 
         print("Found " + str(len(loops)) + " loops")
 
         for loop in loops:
-            project.hook(loop.entry.addr, self.loop_hook)
+            self.r2angr.project.hook(loop.entry.addr, self.loop_hook)
             self.loops_visited[loop.entry.addr] = 0
             self.loop_entry_addrs.append(loop.entry.addr)
+
+
+    def hook_read(self, state):
+        print("Hooked READ at " + str(state.inspect.mem_read_expr) + " from " + str(state.inspect.mem_read_address))
+
+    def hook_return(self, state):
+        print(self.colored("Returned: " + str(state.regs.rax), "green"))
+
+    def hook_fork(self, state):
+        print(self.colored("Forked state at " + hex(state.addr), "yellow"))
+        
+    def hook_exit(self, state):
+        print("State exited at " + hex(state.addr))
 

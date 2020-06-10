@@ -6,7 +6,6 @@ from disass import *
 from printer import *
 from hooks import *
 from util import *
-from analysis import *
 from watcher import *
 
 # Add command to access old mounting commands
@@ -37,15 +36,19 @@ class R2ANGR():
     debugger = Debugger()
     stash = Stash()
     watcher = Watcher()
+    hooks = Hooks()
 
     return_value = ""
 
     commands = [
-            ("a", debugger.debug_continue,                  "a" + colored("[?]                 ", "yellow") + colored("Basic analysis", "green")),
             ("c", debugger.debug_continue,                  "c" + colored("[?]                 ", "yellow") + colored("Continue emulation", "green")),
             ("e", debugger.debug_explore,                  "e" + colored("[?]                 ", "yellow") + colored("Explore using find/avoid comments", "green")),
             ("i", None,                                     "i" + colored("[?]                 ", "yellow") + colored("Initialize at entry point", "green")),
             ("s", stash.list,                  "s" + colored("[?]                 ", "yellow") + colored("States list", "green")),
+
+            ("h", None,                  "h" + colored("[?]                 ", "yellow") + colored("Hooks", "green")),
+            ("hf", hooks.hook_functions,                  "hf" + colored("                    ", "yellow") + colored("Hook all functions", "green")),
+            ("hl", hooks.hook_loops,                  "hl" + colored("                    ", "yellow") + colored("Hook all loops", "green")),
 
             ("cs", debugger.debug_step,           "cs" + colored(" <addr>            ", "yellow") + colored("Continue emulation one step", "green")),
             ("cu", debugger.debug_continue_until,           "cu" + colored(" <addr>            ", "yellow") + colored("Continue emulation until address", "green")),
@@ -73,6 +76,7 @@ class R2ANGR():
         import claripy
 
         self.project = angr.Project(self.binary)
+        self.fast_project = angr.Project(self.binary, auto_load_libs=False)
         state = self.project.factory.entry_state(args=self.argv, stdin=self.stdin)
         self.simgr = self.project.factory.simgr(state)
         self.r2p.cmd("s " + hex(state.solver.eval(state.regs.rip)))
@@ -95,6 +99,7 @@ class R2ANGR():
         self.debugger.r2angr = self
         self.stash.r2angr = self
         self.watcher.r2angr = self
+        self.hooks.r2angr = self
 
         found = False
         for c, f, h in self.commands:
@@ -102,10 +107,6 @@ class R2ANGR():
                 if not self.is_initialized:
                     print("r2angr not initialized, use the mi command")
                 else:
-                    try:
-                        self.simgr.unstash(from_stash="found", to_stash="active")
-                    except:
-                        pass
                     self.return_value = ""
                     f()
                     if not c == "s" and not c == "sl":
