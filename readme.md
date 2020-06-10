@@ -63,7 +63,8 @@ This project is in it's early stages and will only work on some binaries.
  - [ ] Annotate graph with state split locations
 
 ### Exploitation
- - [ ] Figure out features
+ - [ ] Brainstorm list of features
+ - [ ] Integrate or reimplement functionality of rex
 
 ### Hooks
  - [x] Analysis commands for loops, functions, etc
