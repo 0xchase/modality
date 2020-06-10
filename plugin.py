@@ -44,9 +44,6 @@ def r2angr(_):
         except Exception as e:
             print(e)
 
-        # Parse arguments
-        #tmp = command.split(" ")
-        #print(str(tmp))
         try:
             return session.return_value
         except:

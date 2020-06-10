@@ -19,12 +19,19 @@ Detect path explosion
 If path explosion detected, do one more loop to check where split occurs, print that instruction and address
 
 ## Priority
- - Watchpoints
+ - States outputs and inputs
+ - Kill/revive all states
+ - Kill/revive based on output
+ - Explore for certain output
+ - State seeking by index
  - Analysis commands for loops, functions, etc
  - If enabled, replace commands like `dr` with symbolic information
 
 ## Bugs
  - State revive/save doesn't work
+ - Watchpoint comment hit count doesn't work
+ - Watchpoint hits should work per state
+ - Remove watchpoints unimplemented
 
 ---
 

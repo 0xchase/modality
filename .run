@@ -1,1 +1,1 @@
-r2 -i plugin.py challenges/lockpicksim
+r2 -i plugin.py -c "aa;mi;meu main" challenges/lockpicksim

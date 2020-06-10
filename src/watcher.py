@@ -24,3 +24,14 @@ class Watcher():
             self.watchpoints[addr] = (0, " ".join(self.r2angr.command[2:]))
         else:
             self.watchpoints[addr] = (0, "")
+
+    def list_watchpoints(self):
+        i = 0
+        print("Listing " + colored("watchpoints", "magenta") + ":")
+        for addr in self.watchpoints:
+            print(" " + str(i) + " " + hex(addr))
+            i += 1
+
+    def remove_watchpoint(self):
+        print("Unimplemented")
+

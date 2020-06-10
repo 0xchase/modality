@@ -41,25 +41,30 @@ class R2ANGR():
     return_value = ""
 
     commands = [
-            ("a", debugger.debug_continue,                  "a" + colored("[?]              ", "yellow") + colored("Basic analysis", "green")),
-            ("c", debugger.debug_continue,                  "c" + colored("[?]              ", "yellow") + colored("Continue emulation", "green")),
-            ("e", debugger.debug_explore,                  "e" + colored("[?]              ", "yellow") + colored("Explore using find/avoid comments", "green")),
-            ("i", None,                                     "i" + colored("[?]              ", "yellow") + colored("Initialize at entry point", "green")),
-            ("s", stash.list,                  "s" + colored("[?]              ", "yellow") + colored("States list", "green")),
+            ("a", debugger.debug_continue,                  "a" + colored("[?]                 ", "yellow") + colored("Basic analysis", "green")),
+            ("c", debugger.debug_continue,                  "c" + colored("[?]                 ", "yellow") + colored("Continue emulation", "green")),
+            ("e", debugger.debug_explore,                  "e" + colored("[?]                 ", "yellow") + colored("Explore using find/avoid comments", "green")),
+            ("i", None,                                     "i" + colored("[?]                 ", "yellow") + colored("Initialize at entry point", "green")),
+            ("s", stash.list,                  "s" + colored("[?]                 ", "yellow") + colored("States list", "green")),
 
-            ("cs", debugger.debug_step,           "cs" + colored(" <addr>         ", "yellow") + colored("Continue emulation one step", "green")),
-            ("cu", debugger.debug_continue_until,           "cu" + colored(" <addr>         ", "yellow") + colored("Continue emulation until address", "green")),
-            ("cb", debugger.debug_continue_until_branch,    "cb                " + colored("Continue emulation until branch", "green")),
-            ("co", debugger.debug_continue_output,          "co                " + colored("Continue emulation until output", "green")),
+            ("cs", debugger.debug_step,           "cs" + colored(" <addr>            ", "yellow") + colored("Continue emulation one step", "green")),
+            ("cu", debugger.debug_continue_until,           "cu" + colored(" <addr>            ", "yellow") + colored("Continue emulation until address", "green")),
+            ("cb", debugger.debug_continue_until_branch,    "cb                   " + colored("Continue emulation until branch", "green")),
+            ("co", debugger.debug_continue_output,          "co                   " + colored("Continue emulation until output", "green")),
 
-            ("eu", debugger.debug_explore_until,            "eu" + colored(" <addr>         ", "yellow") + colored("Explore until address", "green")),
+            ("eu", debugger.debug_explore_until,            "eu" + colored(" <addr>            ", "yellow") + colored("Explore until address", "green")),
 
-            ("sl", stash.list,                              "sk"+colored(" <index>        ", "yellow") + colored("Kill state by index", "green")),
-            ("sk", stash.kill,                              "sk"+colored(" <index>        ", "yellow") + colored("Kill state by index", "green")),
-            ("sr", stash.revive,                              "sr"+colored(" <index>        ", "yellow") + colored("Kill state by index", "green")),
-            ("ss", stash.save,                              "ss"+colored(" <index>        ", "yellow") + colored("Save only this state by index", "green")),
+            ("sl", stash.list,                              "sl"+colored(" <index>           ", "yellow") + colored("List states", "green")),
+            ("sk", stash.kill,                  "sk" + colored("[?] <index|addr>   ", "yellow") + colored("Kill state by index or address", "green")),
+            ("ska", stash.kill_all,                              "ska"+colored("                  ", "yellow") + colored("Kill all states", "green")),
+            ("sr", stash.revive,                  "sr" + colored("[?] <index|addr>   ", "yellow") + colored("Revive state by index or address", "green")),
+            ("sra", stash.revive_all,                              "sra"+colored("                  ", "yellow") + colored("Revive all states", "green")),
+            ("ss", stash.seek,                              "ss"+colored(" <index>           ", "yellow") + colored("Seek to state by index", "green")),
+            ("se", stash.extract,                              "se"+colored(" <index|addr>      ", "yellow") + colored("Extract single state and kill all others", "green")),
 
-            ("w", watcher.add_watchpoint,                              "w"+colored(" <index>        ", "yellow") + colored("Save only this state by index", "green")),
+            ("w", watcher.add_watchpoint,                              "w"+colored("[?] <addr>          ", "yellow") + colored("Add a watchpoint", "green")),
+            ("wl", watcher.list_watchpoints,                              "wl"+colored("                   ", "yellow") + colored("List watchpoint", "green")),
+            ("wr", watcher.remove_watchpoint,                              "wr"+colored(" <addr>            ", "yellow") + colored("Remove watchpoint", "green")),
     ]
 
     def initialize2(self):
@@ -110,6 +115,7 @@ class R2ANGR():
             self.help(command)
 
     def help(self, command):
+        self.return_value = ""
         command[0] = command[0].replace("?", "")
         print("Getting help")
         for c, f, h in self.commands:
@@ -124,7 +130,6 @@ class R2ANGR():
 
         i = 0
         for state in self.simgr.deadended:
-            print(hex(state.addr))
             self.r2p.cmd("ecHi red @ " + hex(state.addr))
             self.r2p.cmd("CC- @ " + hex(state.addr))
             self.r2p.cmd("CC+r2angr \"deadended\" state " + str(i) + " @ " + hex(state.addr))
@@ -134,7 +139,6 @@ class R2ANGR():
 
         i = 0
         for state in self.simgr.active:
-            print(hex(state.addr))
             self.r2p.cmd("ecHi blue @ " + hex(state.addr))
             self.r2p.cmd("CC- @ " + hex(state.addr))
             self.r2p.cmd("CC+r2angr \"active\" state " + str(i) + " @ " + hex(state.addr))
@@ -144,7 +148,6 @@ class R2ANGR():
 
         i = 0
         for state in self.simgr.found:
-            print(hex(state.addr))
             self.r2p.cmd("ecHi green @ " + hex(state.addr))
             self.r2p.cmd("CC- @ " + hex(state.addr))
             self.r2p.cmd("CC+r2angr \"found\" state " + str(i) + " @ " + hex(state.addr))
@@ -152,4 +155,15 @@ class R2ANGR():
                 self.r2p.cmd("s " + hex(state.addr))
             i += 1
         self.r2p.cmd("r")
+
+        for addr in self.watcher.watchpoints:
+            count, name = self.watcher.watchpoints[addr]
+            self.r2p.cmd("ecHi magenta @ " + hex(addr))
+            self.r2p.cmd("CC- @ " + hex(addr))
+
+            if count > 0:
+                self.r2p.cmd("CC+Watchpoint " + name + " @ " + hex(addr))
+            else:
+                self.r2p.cmd("CC+Watchpoint " + name + "(Hits: " + str(count) + ") @ " + hex(addr))
+
 
