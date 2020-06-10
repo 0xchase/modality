@@ -7,11 +7,10 @@ This project is in it's early stages and will only work on some binaries.
 ## Todo
 
 ### Priority
- - Major analysis commands
  - New printing format
  - Misc easy to implement commands
  - Get basic scripting working
- - Get installation working
+ - Document installation
  - Wiki and tutorial
  - Visual mode auto refresh
  - Short tool overview
@@ -19,6 +18,13 @@ This project is in it's early stages and will only work on some binaries.
  - Bug fixes, make commands more robust
 
 ---
+
+### Documentation
+ - [ ] Document installation
+ - [ ] Wiki and tutorial
+ - [ ] Visual mode auto refresh
+ - [ ] Short tool overview
+ - [ ] Long tutorial video
 
 ### Emulation
  - [x] Basic initialization: `mi`
@@ -32,10 +38,6 @@ This project is in it's early stages and will only work on some binaries.
  - [x] Basic watchpoint commands: `mw`, `mwl`
  - [ ] More watchpoint commands (remove watchpoints, run command at watchpoints)
  - [ ] Switch between concrete and symbolic execution
-
-### Analysis
- - [ ] Analysis commands for loops, functions, etc
- - [ ] Move analysis commands to the hook clasification
 
 ### Stash manipulation
  - [x] Basic state manipulation: `ms`, `msl`, `msk`, `msr`, `mse`, `mss`
@@ -64,6 +66,8 @@ This project is in it's early stages and will only work on some binaries.
  - [ ] Figure out features
 
 ### Hooks
+ - [x] Analysis commands for loops, functions, etc
+ - [x] Move analysis commands to the hook clasification
  - [ ] When hooking function calls, print args
  - [ ] Print function return values
  - [ ] Command to add hooks at locations, run some r2 command there

@@ -18,15 +18,11 @@ def r2angr(_):
     global session
     global initialized
 
-    """Build the plugin"""
-
     binary = r.cmdj("ij")["core"]["file"]
 
     def process(command):
         global session
         global initialized
-
-        """Process commands here"""
 
         if not command.startswith("m"):
             return 0
