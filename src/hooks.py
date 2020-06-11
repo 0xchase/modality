@@ -7,9 +7,6 @@ from termcolor import colored
 #state.inspect.b("return", hit_return)
 
 class Hooks():
-    def print_analysis(self, s):
-        print(colored("[", "yellow") + colored("Hook", "yellow") + colored("] ", "yellow") + s)
-
     def aaa(self):
         print("Function call, loops, and memory r/w analysis")
 
@@ -29,25 +26,25 @@ class Hooks():
     def hook_functions(self):
         for func in self.r2angr.r2p.cmdj("aflj"):
             if ".imp." in func["name"]:
-                self.print_analysis("Hooking import: " + colored(func["name"], "green") + " at " + hex(func["offset"]))
+                self.print_hooks("Hooking import: " + colored(func["name"], "green") + " at " + hex(func["offset"]))
                 self.r2angr.project.hook(func["offset"], self.library_function_hook)
             else:
-                self.print_analysis("Hooking function: " + colored(func["name"], "green") + " at " + hex(func["offset"]))
+                self.print_hooks("Hooking function: " + colored(func["name"], "green") + " at " + hex(func["offset"]))
                 self.r2angr.project.hook(func["offset"], self.function_hook)
 
     def function_hook(self, state):
         name = "function"
         for func in self.r2angr.r2p.cmdj("aflj"):
             if func["offset"] == state.addr:
-                name = func["name"]
-        self.print_analysis(colored("Called " + name, "green"))
+                name = func["signature"]
+        self.print_hooks(colored("Called " + name, "green"))
 
     def library_function_hook(self, state):
         name = "function"
         for func in self.r2angr.r2p.cmdj("aflj"):
             if func["offset"] == state.addr:
-                name = func["name"]
-        self.print_analysis(colored("Called " + name, "green"))
+                name = func["signature"]
+        self.print_hooks(colored("Called " + name, "green"))
 
     def print_disass_data(self, s, state):
         if "rbp" in s:
@@ -77,9 +74,9 @@ class Hooks():
         if "cmp" in cmp_m:
             cmp_str = "[cmp " + self.print_disass_data(cmp_op[0], state) + ", " + self.print_disass_data(cmp_op[1], state) + "]"
         if count == 0:
-            print(colored("Starting loop at " + hex(state.addr), "yellow"))
+            self.print_hooks(colored("Starting loop at " + hex(state.addr), "yellow"))
         else:
-            print(colored(" [" + str(len(simgr.active)) + "|" + colored(str(len(simgr.deadended)), "red") + colored("]", "yellow"), "yellow"), colored("{Loop count: " + str(loops_visited[state.addr]) + "}", "cyan"), " Looping at " + hex(state.addr) + " " + cmp_str)
+            self.print_hooks(colored(" [" + str(len(simgr.active)) + "|" + colored(str(len(simgr.deadended)), "red") + colored("] ", "yellow"), "yellow") + colored("{Loop count: " + str(loops_visited[state.addr]) + "}", "cyan") + " Looping at " + hex(state.addr) + " " + cmp_str)
         loops_visited[state.addr] += 1
 
     def hook_loops(self):
@@ -98,7 +95,7 @@ class Hooks():
 
         loops = fast_project.analyses.LoopFinder(functions=functions).loops
 
-        print("Found " + str(len(loops)) + " loops")
+        self.print_hooks("Found " + str(len(loops)) + " loops")
 
         for loop in loops:
             self.r2angr.project.hook(loop.entry.addr, self.loop_hook)
@@ -117,4 +114,7 @@ class Hooks():
         
     def hook_exit(self, state):
         print("State exited at " + hex(state.addr))
+
+    def print_hooks(self, s):
+            print(colored("[", "yellow") + colored("HOOKS", "magenta") + colored("] ", "yellow") + s)
 

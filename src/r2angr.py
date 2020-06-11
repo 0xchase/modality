@@ -71,7 +71,7 @@ class R2ANGR():
     ]
 
     def initialize2(self):
-        print("Initializing state")
+        print(colored("[", "yellow") + colored("R2ANGR", "green") + colored("] ", "yellow") + colored("Importing angr", "yellow"))
         import angr
         import claripy
 
@@ -80,7 +80,7 @@ class R2ANGR():
         state = self.project.factory.entry_state(args=self.argv, stdin=self.stdin)
         self.simgr = self.project.factory.simgr(state)
         self.r2p.cmd("s " + hex(state.solver.eval(state.regs.rip)))
-        print("Initialized r2angr")
+        print(colored("[", "yellow") + colored("R2ANGR", "green") + colored("] ", "yellow") + colored("Initialized r2angr", "yellow"))
 
     def __init__(self, binary, r2p):
         self.stdin = claripy.BVS("stdin", 20*8)

@@ -12,8 +12,8 @@ This project is in it's early stages and will only work on some binaries.
  - Get basic scripting working
  - Document installation
  - Wiki and tutorial
- - Visual mode auto refresh
  - Short tool overview
+ - Visual mode auto refresh
  - Long tutorial video
  - Bug fixes, make commands more robust
 
@@ -22,7 +22,6 @@ This project is in it's early stages and will only work on some binaries.
 ### Documentation
  - [ ] Document installation
  - [ ] Wiki and tutorial
- - [ ] Visual mode auto refresh
  - [ ] Short tool overview
  - [ ] Long tutorial video
 

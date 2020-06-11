@@ -10,10 +10,13 @@ class Debugger():
 
     # Continues execution
     def debug_continue(self):
+        self.print_debug("Continuing emulation")
         self.r2angr.simgr.run()
 
     # Steps execution 
     def debug_step(self):
+        self.print_debug("Continuing emulation one step")
+
         if len(self.r2angr.command) == 1:
             self.r2angr.simgr.step()
         else:
@@ -88,7 +91,7 @@ class Debugger():
             a_str += colored(hex(a), "red") + colored(", ", "yellow")
         a_str = a_str[:-6]
 
-        print(colored("Starting exploration.\nFind: [", "yellow") + f_str + colored("]. Avoid: [", "yellow") + a_str + colored("].", "yellow"))
+        self.print_debug(colored("Starting exploration.\nFind: [", "yellow") + f_str + colored("]. Avoid: [", "yellow") + a_str + colored("].", "yellow"))
 
         self.r2angr.simgr.explore(find=find, avoid=avoid)
 
@@ -155,6 +158,8 @@ class Debugger():
         except:
             print(colored(str(command[1]) + " not found", "yellow"))
             return
+
+        self.print_debug(colored("Starting exploration. Find: [", "yellow") + colored(hex(addr), "green") + colored("]", "yellow"))
 
         simgr.explore(find=addr)
 
@@ -331,12 +336,14 @@ class Debugger():
             print(colored("Usage: mcu <address|symbol>", "yellow"))
             return
 
+        self.print_debug("Continuing until " + hex(addr))
+
         while len(simgr.active) > 0 and simgr.active[0].addr != addr:
             simgr.step()
 
     # Continue emulation until new data in stdout
     def debug_continue_output(self):
-        print("Debug continue until output")
+        self.print_debug("Debug continue until output")
         output = self.r2angr.simgr.active[0].posix.dumps(1)
         output = []
 
@@ -391,4 +398,7 @@ class Debugger():
             return int(s)
 
     def print_explore(self):
-        print(colored("Found " + str(len(self.r2angr.simgr.found)) + " solutions", "green"))
+        self.print_debug(colored("Found " + str(len(self.r2angr.simgr.found)) + " solutions", "green"))
+    
+    def print_debug(self, s):
+        print(colored("[", "yellow") + colored("DEBUG", "blue") + colored("] ", "yellow") + colored(s, "yellow"))
