@@ -8,6 +8,9 @@ from hooks import *
 from util import *
 from watcher import *
 
+from threading import Thread
+from time import sleep
+
 # Add command to access old mounting commands
 # Add all old commands. Go through each, making sure it works. Make commands robust.
 # Add load commands (load registers, stack, etc) from debug session
@@ -58,6 +61,9 @@ class R2ANGR():
             ("eu", debugger.debug_explore_until,            "eu" + colored(" <addr>            ", "yellow") + colored("Explore until address", "green")),
 
             ("sl", stash.list,                              "sl"+colored(" <index>           ", "yellow") + colored("List states", "green")),
+            ("slv", stash.info,                              "slv"+colored("                  ", "yellow") + colored("List active state verbose", "green")),
+            ("si", stash.print_input,                              "si"+colored("                   ", "yellow") + colored("Print state stdin", "green")),
+            ("so", stash.print_output,                              "so"+colored("                   ", "yellow") + colored("Print state stdout", "green")),
             ("sk", stash.kill,                  "sk" + colored("[?] <index|addr>   ", "yellow") + colored("Kill state by index or address", "green")),
             ("ska", stash.kill_all,                              "ska"+colored("                  ", "yellow") + colored("Kill all states", "green")),
             ("sr", stash.revive,                  "sr" + colored("[?] <index|addr>   ", "yellow") + colored("Revive state by index or address", "green")),
@@ -112,6 +118,7 @@ class R2ANGR():
                     if not c == "s" and not c == "sl":
                         self.update_highlight()
                 found = True
+
         if not found or "?" in command:
             self.help(command)
 
@@ -166,5 +173,4 @@ class R2ANGR():
                 self.r2p.cmd("CC+Watchpoint " + name + " @ " + hex(addr))
             else:
                 self.r2p.cmd("CC+Watchpoint " + name + "(Hits: " + str(count) + ") @ " + hex(addr))
-
 

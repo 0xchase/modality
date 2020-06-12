@@ -7,7 +7,9 @@ This project is in it's early stages and will only work on some binaries.
 ## Todo
 
 ### Priority
- - New printing format
+ - Simplify initialization
+ - State input/output printing
+ - Integrate with debug view
  - Misc easy to implement commands
  - Get basic scripting working
  - Document installation
@@ -28,6 +30,7 @@ This project is in it's early stages and will only work on some binaries.
 ### Emulation
  - [x] Basic initialization: `mi`
  - [ ] Initialize at arbitrary memory location
+ - [ ] Symbolize arbitrary number of arguments (use -d arguments to set them initially)
  - [ ] Initialize on function with current debugger args, specific args, or symbolic args
  - [x] Basic emulation: `mc`, `mcs`, `mcb`, `mcu`, `mco`
  - [x] Basic exploration: `me`, `meu`
@@ -41,6 +44,7 @@ This project is in it's early stages and will only work on some binaries.
 ### Stash manipulation
  - [x] Basic state manipulation: `ms`, `msl`, `msk`, `msr`, `mse`, `mss`
  - [x] Group state operations: `mska`, `msra`
+ - [x] Print more detailed state information
  - [ ] Kill/revive based on output
  - [ ] State seeking by index
  - [ ] States outputs and inputs
@@ -68,6 +72,7 @@ This project is in it's early stages and will only work on some binaries.
 ### Hooks
  - [x] Analysis commands for loops, functions, etc
  - [x] Move analysis commands to the hook clasification
+ - [ ] List hooks
  - [ ] When hooking function calls, print args
  - [ ] Print function return values
  - [ ] Command to add hooks at locations, run some r2 command there

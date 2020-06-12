@@ -5,6 +5,72 @@ from termcolor import colored
 
 # ========== Commands ========== #
 class Stash():
+    def info(self):
+        i = 0
+        for state in self.r2angr.simgr.active:
+            self.print_return(colored("Active", "cyan") + " state " + str(i) + " at " + colored(hex(state.addr), "green"))
+            s = self.r2angr.r2p.cmd("pdi 5 @ " + hex(state.addr))
+            for line in s.split("\n"):
+                self.print_return("   " + line)
+            i += 1
+
+    def list(self):
+        table = []
+
+        if len(self.r2angr.simgr.found) > 0:
+            self.print_return(colored("Found", "green") + " states:")
+            for i in range(0, len(self.r2angr.simgr.found)):
+                self.print_return("  " + str(i) + " " + colored(hex(self.r2angr.simgr.found[i].addr), "yellow"))
+            self.print_return("")
+
+        if len(self.r2angr.simgr.active) > 0:
+            self.print_return(colored("Active", "cyan") + " states:")
+            for i in range(0, len(self.r2angr.simgr.active)):
+                self.print_return("  " + str(i) + " " + colored(hex(self.r2angr.simgr.active[i].addr), "yellow"))
+            self.print_return("")
+
+        if len(self.r2angr.simgr.deadended) > 0:
+            self.print_return(colored("Deadended", "red") + " states:")
+            for i in range(0, len(self.r2angr.simgr.deadended)):
+                self.print_return("  " + str(i) + " " + colored(hex(self.r2angr.simgr.deadended[i].addr), "yellow"))
+            self.print_return("")
+
+    def print_input(self):
+        command = self.r2angr.command
+        simgr = self.r2angr.simgr
+        addr = 0
+
+        if len(command) == 1:
+            i = 0
+            for state in simgr.active:
+                self.print_return(colored("Active", "cyan") + " state " + str(i) + " at " + colored(hex(state.addr), "green") + ":")
+                self.print_decode(state.posix.dumps(0))
+                i += 1
+        elif "0x" in command[1]:
+            for state in simgr.active:
+                if state.addr == addr:
+                    self.print_decode(state.posix.dumps(0))
+        else:
+            self.print_decode(simgr.active[int(command[1])].posix.dumps(0))
+
+    def print_output(self):
+        command = self.r2angr.command
+        simgr = self.r2angr.simgr
+        addr = 0
+
+        if len(command) == 1:
+            i = 0
+            for state in simgr.active:
+                self.print_return(colored("Active", "cyan") + " state " + str(i) + " at " + colored(hex(state.addr), "green") + ":")
+                self.print_decode(state.posix.dumps(1))
+                i += 1
+        elif "0x" in command[1]:
+            for state in simgr.active:
+                if state.addr == addr:
+                    self.print_decode(state.posix.dumps(1))
+        else:
+            self.print_decode(simgr.active[int(command[1])].posix.dumps(1))
+
     def kill(self):
         command = self.r2angr.command
         simgr = self.r2angr.simgr
@@ -52,27 +118,6 @@ class Stash():
 
         simgr.move(from_stash='deadended', to_stash='active', filter_func=lambda s: s.addr == addr)
 
-    def list(self):
-        table = []
-
-        if len(self.r2angr.simgr.found) > 0:
-            self.print_return(colored("Found", "green") + " states:")
-            for i in range(0, len(self.r2angr.simgr.found)):
-                self.print_return("  " + str(i) + " " + colored(hex(self.r2angr.simgr.found[i].addr), "yellow"))
-            self.print_return("")
-
-        if len(self.r2angr.simgr.active) > 0:
-            self.print_return(colored("Active", "cyan") + " states:")
-            for i in range(0, len(self.r2angr.simgr.active)):
-                self.print_return("  " + str(i) + " " + colored(hex(self.r2angr.simgr.active[i].addr), "yellow"))
-            self.print_return("")
-
-        if len(self.r2angr.simgr.deadended) > 0:
-            self.print_return(colored("Deadended", "red") + " states:")
-            for i in range(0, len(self.r2angr.simgr.deadended)):
-                self.print_return("  " + str(i) + " " + colored(hex(self.r2angr.simgr.deadended[i].addr), "yellow"))
-            self.print_return("")
-
     def revive_all(self):
         simgr = self.r2angr.simgr
         simgr.move(from_stash='deadended', to_stash='active', filter_func=lambda s: True)
@@ -111,11 +156,11 @@ class Stash():
         else:
             return hex(state.addr)
 
-    def print_decode(data):
+    def print_decode(self, data):
         try:
-            print(data.decode())
+            self.print_return(data.decode())
         except:
-            print(str(data))
+            self.print_return(str(data))
 
     def print_return(self, s):
         self.r2angr.return_value += s + "\n"
