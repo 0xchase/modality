@@ -80,6 +80,7 @@ class R2ANGR():
         print(colored("[", "yellow") + colored("R2ANGR", "green") + colored("] ", "yellow") + colored("Importing angr", "yellow"))
         import angr
         import claripy
+        self.angr = angr
         print(colored("[", "yellow") + colored("R2ANGR", "green") + colored("] ", "yellow") + colored("Loading r2angr", "yellow"))
         self.is_initialized = True
 
@@ -91,8 +92,8 @@ class R2ANGR():
         print(colored("[", "yellow") + colored("R2ANGR", "green") + colored("] ", "yellow") + colored("Initialized r2angr at entry point", "yellow"))
 
     def initialize_entry(self):
-        self.project = angr.Project(self.binary)
-        self.fast_project = angr.Project(self.binary, auto_load_libs=False)
+        self.project = self.angr.Project(self.binary)
+        self.fast_project = self.angr.Project(self.binary, auto_load_libs=False)
         state = self.project.factory.entry_state(args=self.argv, stdin=self.stdin)
         self.simgr = self.project.factory.simgr(state)
         self.r2p.cmd("s " + hex(state.solver.eval(state.regs.rip)))
@@ -107,7 +108,7 @@ class R2ANGR():
         command = command.split(" ")
 
         if "i" == command[0]:
-            self.initialize2()
+            self.initialize_entry()
             self.is_initialized = True
             return
 
