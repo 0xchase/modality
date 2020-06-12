@@ -7,8 +7,6 @@ This project is in it's early stages and will only work on some binaries.
 ## Todo
 
 ### Priority
- - Simplify initialization
- - State input/output printing
  - Integrate with debug view
  - Misc easy to implement commands
  - Get basic scripting working
@@ -45,10 +43,11 @@ This project is in it's early stages and will only work on some binaries.
  - [x] Basic state manipulation: `ms`, `msl`, `msk`, `msr`, `mse`, `mss`
  - [x] Group state operations: `mska`, `msra`
  - [x] Print more detailed state information
+ - [ ] Print info while killing/reviving/extracting states
  - [ ] Kill/revive based on output
  - [ ] State seeking by index
- - [ ] States outputs and inputs
- - [ ] Print more detailed state information (current function, ...)
+ - [x] States outputs and inputs printing
+ - [ ] Print even more detailed state information (current function, ...)
 
 ### Symbolize commands
  - [ ] Commands to symbolize registers or stack values with different data types

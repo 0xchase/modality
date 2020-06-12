@@ -33,6 +33,9 @@ def r2angr(_):
                 from r2angr import R2ANGR
                 session = R2ANGR(binary, r)
                 initialized = True
+
+                session.load_angr()
+
             except Exception as e:
                 print(e)
         try:

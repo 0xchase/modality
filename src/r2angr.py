@@ -76,17 +76,27 @@ class R2ANGR():
             ("wr", watcher.remove_watchpoint,                              "wr"+colored(" <addr>            ", "yellow") + colored("Remove watchpoint", "green")),
     ]
 
-    def initialize2(self):
+    def load_angr(self):
         print(colored("[", "yellow") + colored("R2ANGR", "green") + colored("] ", "yellow") + colored("Importing angr", "yellow"))
         import angr
         import claripy
+        print(colored("[", "yellow") + colored("R2ANGR", "green") + colored("] ", "yellow") + colored("Loading r2angr", "yellow"))
+        self.is_initialized = True
 
         self.project = angr.Project(self.binary)
         self.fast_project = angr.Project(self.binary, auto_load_libs=False)
         state = self.project.factory.entry_state(args=self.argv, stdin=self.stdin)
         self.simgr = self.project.factory.simgr(state)
         self.r2p.cmd("s " + hex(state.solver.eval(state.regs.rip)))
-        print(colored("[", "yellow") + colored("R2ANGR", "green") + colored("] ", "yellow") + colored("Initialized r2angr", "yellow"))
+        print(colored("[", "yellow") + colored("R2ANGR", "green") + colored("] ", "yellow") + colored("Initialized r2angr at entry point", "yellow"))
+
+    def initialize_entry(self):
+        self.project = angr.Project(self.binary)
+        self.fast_project = angr.Project(self.binary, auto_load_libs=False)
+        state = self.project.factory.entry_state(args=self.argv, stdin=self.stdin)
+        self.simgr = self.project.factory.simgr(state)
+        self.r2p.cmd("s " + hex(state.solver.eval(state.regs.rip)))
+        print(colored("[", "yellow") + colored("R2ANGR", "green") + colored("] ", "yellow") + colored("Initialized r2angr at entry point", "yellow"))
 
     def __init__(self, binary, r2p):
         self.stdin = claripy.BVS("stdin", 20*8)
@@ -153,16 +163,6 @@ class R2ANGR():
             if not "invalid" in self.r2p.cmd("pd 2 @ " + hex(state.addr)):
                 self.r2p.cmd("s " + hex(state.addr))
             i += 1
-
-        i = 0
-        for state in self.simgr.found:
-            self.r2p.cmd("ecHi green @ " + hex(state.addr))
-            self.r2p.cmd("CC- @ " + hex(state.addr))
-            self.r2p.cmd("CC+r2angr \"found\" state " + str(i) + " @ " + hex(state.addr))
-            if not "invalid" in self.r2p.cmd("pd 2 @ " + hex(state.addr)):
-                self.r2p.cmd("s " + hex(state.addr))
-            i += 1
-        self.r2p.cmd("r")
 
         for addr in self.watcher.watchpoints:
             count, name = self.watcher.watchpoints[addr]
