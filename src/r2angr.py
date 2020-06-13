@@ -139,7 +139,7 @@ class R2ANGR():
         print("Getting help")
         for c, f, h in self.commands:
             if command[0] in c.split(" ")[0].replace("?", "") and len(c) - len(command[0]) < 2:
-                print("| m" + h)
+                print("| M" + h)
 
     def update_highlight(self):
         for comment in self.r2p.cmdj("CCj"):

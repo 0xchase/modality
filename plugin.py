@@ -24,7 +24,7 @@ def r2angr(_):
         global session
         global initialized
 
-        if not command.startswith("m"):
+        if not command.startswith("M"):
             return 0
 
         if not initialized:
