@@ -1,13 +1,26 @@
-# r2angr
+# Modality
 
-This project is in it's early stages and will only work on some binaries.
+This project is in alpha so bugs and missing features are expected but will be fixed soon.
 
 ---
 
-## Todo
+## Installation
+
+This installation is a a bit of a hack, a more elegant one is coming soon.
+```
+sudo apt-get install python3-dev libffi-dev build-essential virtualenvwrapper
+pip3 install angr
+pip3
+
+```
+
+---
+
+## Features
 
 ### Priority
- - Integrate with debug view
+ - States list registers
+ - States list dissassembly
  - Misc easy to implement commands
  - Get basic scripting working
  - Document installation
@@ -28,6 +41,7 @@ This project is in it's early stages and will only work on some binaries.
 ### Emulation
  - [x] Basic initialization: `mi`
  - [ ] Initialize at arbitrary memory location
+ - [ ] Add all the exploration methods
  - [ ] Symbolize arbitrary number of arguments (use -d arguments to set them initially)
  - [ ] Initialize on function with current debugger args, specific args, or symbolic args
  - [x] Basic emulation: `mc`, `mcs`, `mcb`, `mcu`, `mco`
@@ -54,6 +68,7 @@ This project is in it's early stages and will only work on some binaries.
  - [ ] Commands to symbolize variables
 
 ### Visualization
+ - [ ] PEDA like view option
  - [ ] Finalize found/active highlighting and stashing
  - [ ] Indent all printing according to call/loop hierarchy
  - [ ] Implement custom radare2 panels view for exploration
