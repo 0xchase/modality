@@ -1,14 +1,14 @@
 # Modality
 
-This project is still in development so bugs and missing features are expected. If you find one, feel free to create issues or submit pull requests.
+A radare2 plugin to quickly perform symbolic execution inside radare2 with angr. This project is still in development so bugs and missing features are expected. 
 
 ---
 
-## About
+### Documentation
 
-A radare2 plugin to quickly perform symbolic execution inside radare2 with angr, a platform-agnostic binary analysis framework by the Computer Security Lab at UC Santa Barbara and SEFCOM at Arizona State University. This plugin is intended to integrate angr in a way that's (relativley) consistent with the r2cli conventions
+The documentation as well as several tutorials can be found [here](https://chasekanipe.gitbook.io/modality/).
 
-## Goals
+### Goals
 
 This project intends to
  - Better integrate symbolic execution with the rest of the reverse engineering process
@@ -16,4 +16,3 @@ This project intends to
  - Allow for switching between concrete and symbolic execution (this feature is coming soon)
  - Provide useful visualizations of the angr backend
  - Include a suite of features for vulnerability detection, exploit generation, etc (coming soon)
-
