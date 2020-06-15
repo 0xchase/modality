@@ -1,8 +1,20 @@
 # Table of contents
 
-* [README](README.md)
+## Introduction
+* [About](about.md)
+* [Installation](installation.md)
+* [Contributing](contributing.md)
 
-## Exploration Techniques
+## Features
+* [Overview](overview.md)
+* [Exploration](exploration.md)
+* [Emulation](emulation.md)
+* [Initialization](initialization.md)
+* [States](states.md)
+* [Hooks](hooks.md)
+* [Watchpoints](watchpoints.md)
+* [Exploitation](exploitation.md)
+* [Scripting](scripting.md)
 
 ## Examples
 * [Basic Exploration](angrctf0.md)
@@ -10,4 +22,3 @@
 * [Finding Output](angrctf2.md)
 * [Working with bitvectors](angrctf3.md)
 
-The table of contents is in the summary that is shown above.
