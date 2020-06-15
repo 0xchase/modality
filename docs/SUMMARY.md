@@ -1,7 +1,6 @@
 # Table of contents
 
-## Introduction
-* [About](about.md)
+## Getting started
 * [Installation](installation.md)
 * [Contributing](contributing.md)
 
@@ -15,6 +14,7 @@
 * [Initialization](initialization.md)
 * [States](states.md)
 * [Hooks](hooks.md)
+* [Bitvectors](bitvectors.md)
 * [Watchpoints](watchpoints.md)
 * [Exploitation](exploitation.md)
 * [Scripting](scripting.md)
