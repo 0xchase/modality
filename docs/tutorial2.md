@@ -79,7 +79,7 @@ This password can be checked against the binary.
 
 ```
 [0x080485dd]> q
-chase@chase:~/github/r2angr/docs/challenges$ ./01_angr_avoid 
+shell@shell:~/github/r2angr/docs/challenges$ ./01_angr_avoid 
 placeholder
 Enter the password: RNGFXITY
 Good Job.

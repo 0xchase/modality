@@ -180,9 +180,9 @@ Let's try this password on the binary.
 
 ```
 [0x080495d8]> q
-chase@chase:~/github/r2angr/docs/challenges$ ./02_angr_find_condition 
+shell@shell:~/github/r2angr/docs/challenges$ ./02_angr_find_condition 
 placeholder
 Enter the password: UFOHHURD
 Good Job.
-chase@chase:~/github/r2angr/docs/challenges$ 
+shell@shell:~/github/r2angr/docs/challenges$ 
 ```

@@ -5,7 +5,7 @@ The following tutorials will use binaries from the angr_ctf by *jakespringer* (i
 We'll start by opening and analyzing the binary with radare2.
 
 ```
-chase@chase:~/github/r2angr/docs/challenges$ r2 00_angr_find 
+shell@shell:~/github/r2angr/docs/challenges$ r2 00_angr_find 
  -- Use rarun2 to launch your programs with a predefined environment.
 [0x08048450]> aaa
 [x] Analyze all flags starting with sym. and entry0 (aa)
