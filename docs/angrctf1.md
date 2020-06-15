@@ -1,211 +1,86 @@
-# Modality
+# Finding and Avoiding
 
-This project is still in development so bugs and missing features are expected. If you find one, feel free to create an issue.
+For this challenge we'll use a different find/avoid technique. The challenge is 01_angr_avoid. We'll start by opening the binary and doing some basic analysis.
 
-## About
-
-A radare2 plugin to quickly perform symbolic execution inside radare2 with angr, a platform-agnostic binary analysis framework by the Computer Security Lab at UC Santa Barbara and SEFCOM at Arizona State University. This plugin is intended to integrate angr in a way that's \(relativley\) consistent with the r2cli conventions
-
-### Goals
-
-This project intends to
-
-* Better integrate symbolic execution with the rest of the reverse engineering process
-* Provide a faster/simpler alternative to using angr than the python bindings
-* Allow for switching between concrete and symbolic execution \(this feature is coming soon\)
-* Provide useful visualizations of the angr backend
-* Allow for interactive and fine grained control over angr execution
-* Include a suite of commands for vulnerability detection, exploit generation, etc \(coming soon\)
-* Have long term support
-
-## Features
-
-### Documentation
-
-* [ ] Document installation
-* [ ] Wiki and tutorial
-* [ ] Short tool overview
-* [ ] Long tutorial video
-
-### Emulation
-
-* [x] Basic initialization: `mi`
-* [ ] Initialize at arbitrary memory location
-* [ ] Add all the exploration methods
-* [ ] Symbolize arbitrary number of arguments \(use -d arguments to set them initially\)
-* [ ] Initialize on function with current debugger args, specific args, or symbolic args
-* [x] Basic emulation: `mc`, `mcs`, `mcb`, `mcu`, `mco`
-* [x] Basic exploration: `me`, `meu`
-* [ ] Explore for certain output
-* [ ] Implement staged exploration
-* [ ] Add avoid/find annotation commands
-* [x] Basic watchpoint commands: `mw`, `mwl`
-* [ ] More watchpoint commands \(remove watchpoints, run command at watchpoints\)
-* [ ] Switch between concrete and symbolic execution
-
-### Stash manipulation
-
-* [x] Basic state manipulation: `ms`, `msl`, `msk`, `msr`, `mse`, `mss`
-* [x] Group state operations: `mska`, `msra`
-* [x] Print more detailed state information
-* [ ] Print info while killing/reviving/extracting states
-* [ ] Kill/revive based on output
-* [ ] State seeking by index
-* [x] States outputs and inputs printing
-* [ ] Print even more detailed state information \(current function, ...\)
-
-### Symbolize commands
-
-* [ ] Commands to symbolize registers or stack values with different data types
-* [ ] Commands to symbolize variables
-
-### Visualization
-
-* [ ] PEDA like view option
-* [ ] Finalize found/active highlighting and stashing
-* [ ] Indent all printing according to call/loop hierarchy
-* [ ] Implement custom radare2 panels view for exploration
-* [ ] Print log of a state history
-* [ ] If enabled, replace commands like `dr` with symbolic information
-* [ ] Graph an emulation history, with branches at state splitting and annotations for loops, branches, etc
-* [ ] Standardize print messages with formats like \[DEBUG\] \[PRINT\] \[HOOK\] etc
-* [ ] Command to print detailed info about state at current address. Can be used with visual panels mode.
-* [ ] Annotate graph with state split locations
-
-### Exploitation
-
-* [ ] Brainstorm list of features
-* [ ] Integrate or reimplement functionality of rex
-
-### Hooks
-
-* [x] Analysis commands for loops, functions, etc
-* [x] Move analysis commands to the hook clasification
-* [ ] List hooks
-* [ ] When hooking function calls, print args
-* [ ] Print function return values
-* [ ] Command to add hooks at locations, run some r2 command there
-* [ ] When state splits, print \[1\|2\] =&gt; \[1\|3\] with split address
-* [ ] Add custom hooks for strlen, etc that ask for length or arbitrary length. Can also set this in the config.
-
-### Other
-
-* [ ] Deal with offets for PIE
-* [ ] Commands to edit config.txt file
-* [ ] Integrate ghidra with the disassembler
-* [ ] Watchpoint comment hit count doesn't work
-* [ ] Watchpoint hits should work per state
-* [ ] Remove watchpoints unimplemented
-* [ ] der command broken
-* [ ] Tools for dealing with path explosion
-* [ ] Get working as scripting engine
-* [ ] Easy way to edit script inside radare2 that runs at the beginning. Can add custom hooks this way.
-* [ ] Make commands robust, go through and check for bugs
-* [ ] Write wiki for this project. Write tutorial for this project
-
-## Short Tutorial
-
-First we'll open one of the example binaries in radare2 and display the help with the `M?` command.
-
-```text
-shell@shell:~/$ r2 challenges/r100 
-[0x00400610]> aa
+```
+shell@shell:~/github/modality/docs/challenges$ r2 01_angr_avoid 
+[0x08048430]> aa
 [x] Analyze all flags starting with sym. and entry0 (aa)
-[0x00400610]> M?
+[0x08048430]> s main
+[0x08048602]> 
+```
+
+The graph of the main function takes a while to render, so you may want to avoid that. Scrolling through the visual mode, we can see it gets some user input, calls `sym.complex_function`, then there's a lot of branches with calls to `sym.avoid_me` and `sym.maybe_good`. We'll seek to the first function and add a comment there that says "avoid". You can seek there and add a comment using `;` from visual mode, or add a comment with the `CC+` command. Once our avoid comment is added we'll seek to the `sym.maybe_good` function, and add a comment that says "find" on the branch that prints "Good Job.". 
+
+Next we can run the `Me` commmand, which collects the addresses marked by find/avoid and explores using those locations.
+
+```
+[0x080485b5]> Me
 [R2ANGR] Importing angr
 [R2ANGR] Loading r2angr
 [R2ANGR] Initialized r2angr at entry point
-Getting help
-| Mc[?]                 Continue emulation
-| Me[?]                 Explore using find/avoid comments
-| Mi[?]                 Initialize at entry point
-| Ms[?]                 States list
-| Mh[?]                 Hooks
-| Mw[?] <addr>          Add a watchpoint
-[0x00400610]>
-```
-
-The first time you run a modality command, it will take a few seconds to load angr, and automatically initialize the project at the entry point. Next, we'll list the commands relevant to emulation with `Me?`.
-
-```text
-[0x00400610]> Me?
-Getting help
-| Me[?]                 Explore using find/avoid comments
-| Meu <addr>            Explore until address
-[0x00400610]>
-```
-
-We'll use the `Meu` command to explore until one of the simulation manager states hits the main function.
-
-```text
-[0x00400610]> Meu main
-[DEBUG] Starting exploration. Find: [0x4007e8]
+[DEBUG] Starting exploration.
+Find: [0x80485dd]. Avoid: [0x80485a8].
+WARNING | 2020-06-15 17:24:37,083 | angr.state_plugins.symbolic_memory | The program is accessing memory or registers with an unspecified value. This could indicate unwanted behavior.
+WARNING | 2020-06-15 17:24:37,083 | angr.state_plugins.symbolic_memory | angr will cope with this by generating an unconstrained symbolic variable and continuing. You can resolve this by:
+WARNING | 2020-06-15 17:24:37,083 | angr.state_plugins.symbolic_memory | 1) setting a value to the initial state
+WARNING | 2020-06-15 17:24:37,083 | angr.state_plugins.symbolic_memory | 2) adding the state option ZERO_FILL_UNCONSTRAINED_{MEMORY,REGISTERS}, to make unknown regions hold null
+WARNING | 2020-06-15 17:24:37,083 | angr.state_plugins.symbolic_memory | 3) adding the state option SYMBOL_FILL_UNCONSTRAINED_{MEMORY_REGISTERS}, to suppress these messages.
+WARNING | 2020-06-15 17:24:37,084 | angr.state_plugins.symbolic_memory | Filling register edi with 4 unconstrained bytes referenced from 0x80d45e1 (__libc_csu_init+0x1 in 01_angr_avoid (0x80d45e1))
+WARNING | 2020-06-15 17:24:37,086 | angr.state_plugins.symbolic_memory | Filling register ebx with 4 unconstrained bytes referenced from 0x80d45e3 (__libc_csu_init+0x3 in 01_angr_avoid (0x80d45e3))
+WARNING | 2020-06-15 17:24:37,437 | angr.state_plugins.symbolic_memory | Filling memory at 0x80d6040 with 240 unconstrained bytes referenced from 0x90512d0 (printf+0x0 in libc.so.6 (0x512d0))
+WARNING | 2020-06-15 17:24:39,695 | angr.state_plugins.symbolic_memory | Filling memory at 0x7ffefffc with 72 unconstrained bytes referenced from 0x907e8c0 (strncmp+0x0 in libc.so.6 (0x7e8c0))
+WARNING | 2020-06-15 17:24:39,695 | angr.state_plugins.symbolic_memory | Filling memory at 0x7ffeff70 with 4 unconstrained bytes referenced from 0x907e8c0 (strncmp+0x0 in libc.so.6 (0x7e8c0))
+WARNING | 2020-06-15 17:24:39,696 | angr.state_plugins.symbolic_memory | Filling memory at 0x7ffeff4d with 11 unconstrained bytes referenced from 0x907e8c0 (strncmp+0x0 in libc.so.6 (0x7e8c0))
+WARNING | 2020-06-15 17:24:39,707 | angr.state_plugins.symbolic_memory | Filling memory at 0x7fff0044 with 20 unconstrained bytes referenced from 0x907e8c0 (strncmp+0x0 in libc.so.6 (0x7e8c0))
 [DEBUG] Found 1 solutions
-[0x004007e8]>
+[0x080485dd]> 
 ```
 
-As we can see, one of our states found the main function. We can list all the active states with `Msl`.
+After a few seconds, we get a solution. We can list the states with the `Msl` command, and kill the unwanted active state as shown below.
 
-```text
-[0x004007e8]> Msl
-Active states:
-  0 0x4007e4
-  1 0x4007e4
-  2 0x4007e8
-
-[0x004007e8]>
 ```
-
-Since we only care about the state at `0x4007e8`, we can kill the states at `0x4007e4` with the `Msk` command \(to kill a single state\) or the `Mse` command \(to extract a single state and kill all the others\).
-
-```text
-[0x004007e8]> Mse 2
-[0x004007e8]> Msl
+[0x080485dd]> Msk 0
+[0x080485dd]> Msl
 Active states:
-  0 0x4007e8
+  0 0x80485dd
 
 Deadended states:
-  0 0x4007e4
-  1 0x4007e4
+  0 0x90303d0
+  1 0x90303d0
+  2 0x90303d0
+  3 0x90303d0
+  4 0x90303d0
+  5 0x90303d0
+  6 0x90303d0
+  7 0x90303d0
+  8 0x90303d0
+  9 0x90303d0
+  10 0x90303d0
+  11 0x90303d0
+  12 0x90303d0
+  13 0x90303d0
+  14 0x90303d0
+  15 0x90303d0
+  16 0x80483d0
+
+[0x080485dd]> 
 ```
 
-This binary contains a success/fail condition. We want to know the input that produces the success condition. We can explore to this branch as shown below.
+We can then print the stdin of the remaining state with the `Msi` command.
 
-```text
-[0x004007e8]> Meu 0x00400844
-[DEBUG] Starting exploration. Find: [0x400844]
-[DEBUG] Found 1 solutions
-[0x00400844]>
+```
+[0x080485dd]> Msi
+Active state 0 at 0x80485dd:
+RNGFXITY
 ```
 
-We can then list the stdin for all active states with `Msi`.
+This password can be checked against the binary.
 
-```text
-[0x00400844]> Msi
-Active state 0 at 0x4005a0:
-b'Code_Talker\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\x00'
-Active state 1 at 0x40085f:
-b'Code_Talke\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\x00'
-Active state 2 at 0x40087f:
-b'Code_Talk\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\x00'
-Active state 3 at 0x4000050:
-b'Code_Tal\xf5\xe5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\x00'
-Active state 4 at 0x400844:
-b'Code_Talkers\xf5\xf5\xf5\xf5\xf5\xf5\xf5\x00'
 ```
-
-Since the state we acare about is at `0x400844`, we know our password is "Code\_Talkers". To explain a variety of features we took a long way to solve this challenge, it could be solved quicker by opening r2 and using the one liner below.
-
-```text
-[0x00400610]> aa;Meu 0x400844;Mse 0x400844;Msi
-[x] Analyze all flags starting with sym. and entry0 (aa)
-[R2ANGR] Importing angr
-[R2ANGR] Loading r2angr
-[R2ANGR] Initialized r2angr at entry point
-[DEBUG] Starting exploration. Find: [0x400844]
-[DEBUG] Found 1 solutions
-Active state 0 at 0x400844:
-b'Code_Talkers\xf5\xf5\xf5\xf5\xf5\xf5\xf5\x00'
-[0x00400844]>
+[0x080485dd]> q
+chase@chase:~/github/r2angr/docs/challenges$ ./01_angr_avoid 
+placeholder
+Enter the password: RNGFXITY
+Good Job.
 ```
-

@@ -31,12 +31,10 @@ class Stash():
     def print_input(self):
         command = self.r2angr.command
         simgr = self.r2angr.simgr
-        print("Printing input")
         addr = 0
 
         if len(command) == 1:
             i = 0
-            print("Made it here " + str(len(self.r2angr.simgr.active)))
             for state in self.r2angr.simgr.active:
                 print(colored("Active", "cyan") + " state " + str(i) + " at " + colored(hex(state.addr), "green") + ":")
                 try:
