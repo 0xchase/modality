@@ -1,4 +1,4 @@
-# Modality <img src="docs/logo.png" align="right" alt="logo" width="200">
+<h1> Modality<h1> <img src="docs/logo.png" align="right" alt="logo" width="200">
 
 A radare2 plugin to quickly perform symbolic execution inside radare2 with angr. 
 
