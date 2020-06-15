@@ -5,8 +5,8 @@
 * [Contributing](contributing.md)
 
 ## References
+* [Features List](features.md)
 * [Command List](list.md)
-* [Features](features.md)
 
 ## Features
 * [Overview](overview.md)
@@ -21,7 +21,7 @@
 * [Scripting](scripting.md)
 * [Visualization](visualization.md)
 
-## Examples
+## Tutorials
 * [Basic Exploration](angrctf0.md)
 * [Finding and Avoiding](angrctf1.md)
 * [Finding Output](angrctf2.md)
