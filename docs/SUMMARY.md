@@ -18,7 +18,7 @@
 * [Watchpoints](watchpoints.md)
 * [Exploitation](exploitation.md)
 * [Scripting](scripting.md)
-* [Visualization](visualzation.md)
+* [Visualization](visualization.md)
 
 ## Examples
 * [Basic Exploration](angrctf0.md)
