@@ -1,3 +1,4 @@
+<img src="docs/logo.png" align="right" alt="logo" width="240">
 # Modality
 
 A radare2 plugin to quickly perform symbolic execution inside radare2 with angr. This project is still in development so bugs and missing features are expected. The tool is partially [documented](https://chasekanipe.gitbook.io/modality/) via gitbooks.
