@@ -1,211 +1,188 @@
-# Modality
+# Finding Output
 
-This project is still in development so bugs and missing features are expected. If you find one, feel free to create an issue.
+For this challenge we'll be exploring until a state has a certain string in stdin. The binary is 02_angr_find_condition. We'll start by opening the binary and running some basic analysis.
 
-## About
-
-A radare2 plugin to quickly perform symbolic execution inside radare2 with angr, a platform-agnostic binary analysis framework by the Computer Security Lab at UC Santa Barbara and SEFCOM at Arizona State University. This plugin is intended to integrate angr in a way that's \(relativley\) consistent with the r2cli conventions
-
-### Goals
-
-This project intends to
-
-* Better integrate symbolic execution with the rest of the reverse engineering process
-* Provide a faster/simpler alternative to using angr than the python bindings
-* Allow for switching between concrete and symbolic execution \(this feature is coming soon\)
-* Provide useful visualizations of the angr backend
-* Allow for interactive and fine grained control over angr execution
-* Include a suite of commands for vulnerability detection, exploit generation, etc \(coming soon\)
-* Have long term support
-
-## Features
-
-### Documentation
-
-* [ ] Document installation
-* [ ] Wiki and tutorial
-* [ ] Short tool overview
-* [ ] Long tutorial video
-
-### Emulation
-
-* [x] Basic initialization: `mi`
-* [ ] Initialize at arbitrary memory location
-* [ ] Add all the exploration methods
-* [ ] Symbolize arbitrary number of arguments \(use -d arguments to set them initially\)
-* [ ] Initialize on function with current debugger args, specific args, or symbolic args
-* [x] Basic emulation: `mc`, `mcs`, `mcb`, `mcu`, `mco`
-* [x] Basic exploration: `me`, `meu`
-* [ ] Explore for certain output
-* [ ] Implement staged exploration
-* [ ] Add avoid/find annotation commands
-* [x] Basic watchpoint commands: `mw`, `mwl`
-* [ ] More watchpoint commands \(remove watchpoints, run command at watchpoints\)
-* [ ] Switch between concrete and symbolic execution
-
-### Stash manipulation
-
-* [x] Basic state manipulation: `ms`, `msl`, `msk`, `msr`, `mse`, `mss`
-* [x] Group state operations: `mska`, `msra`
-* [x] Print more detailed state information
-* [ ] Print info while killing/reviving/extracting states
-* [ ] Kill/revive based on output
-* [ ] State seeking by index
-* [x] States outputs and inputs printing
-* [ ] Print even more detailed state information \(current function, ...\)
-
-### Symbolize commands
-
-* [ ] Commands to symbolize registers or stack values with different data types
-* [ ] Commands to symbolize variables
-
-### Visualization
-
-* [ ] PEDA like view option
-* [ ] Finalize found/active highlighting and stashing
-* [ ] Indent all printing according to call/loop hierarchy
-* [ ] Implement custom radare2 panels view for exploration
-* [ ] Print log of a state history
-* [ ] If enabled, replace commands like `dr` with symbolic information
-* [ ] Graph an emulation history, with branches at state splitting and annotations for loops, branches, etc
-* [ ] Standardize print messages with formats like \[DEBUG\] \[PRINT\] \[HOOK\] etc
-* [ ] Command to print detailed info about state at current address. Can be used with visual panels mode.
-* [ ] Annotate graph with state split locations
-
-### Exploitation
-
-* [ ] Brainstorm list of features
-* [ ] Integrate or reimplement functionality of rex
-
-### Hooks
-
-* [x] Analysis commands for loops, functions, etc
-* [x] Move analysis commands to the hook clasification
-* [ ] List hooks
-* [ ] When hooking function calls, print args
-* [ ] Print function return values
-* [ ] Command to add hooks at locations, run some r2 command there
-* [ ] When state splits, print \[1\|2\] =&gt; \[1\|3\] with split address
-* [ ] Add custom hooks for strlen, etc that ask for length or arbitrary length. Can also set this in the config.
-
-### Other
-
-* [ ] Deal with offets for PIE
-* [ ] Commands to edit config.txt file
-* [ ] Integrate ghidra with the disassembler
-* [ ] Watchpoint comment hit count doesn't work
-* [ ] Watchpoint hits should work per state
-* [ ] Remove watchpoints unimplemented
-* [ ] der command broken
-* [ ] Tools for dealing with path explosion
-* [ ] Get working as scripting engine
-* [ ] Easy way to edit script inside radare2 that runs at the beginning. Can add custom hooks this way.
-* [ ] Make commands robust, go through and check for bugs
-* [ ] Write wiki for this project. Write tutorial for this project
-
-## Short Tutorial
-
-First we'll open one of the example binaries in radare2 and display the help with the `M?` command.
-
-```text
-shell@shell:~/$ r2 challenges/r100 
-[0x00400610]> aa
+```
+shell@shell:~/github/r2angr/docs/challenges$ r2 02_angr_find_condition 
+ -- Check your IO plugins with 'r2 -L'
+[0x08048450]> aa
 [x] Analyze all flags starting with sym. and entry0 (aa)
-[0x00400610]> M?
+[0x08048450]> s main
+[0x080485c8]> 
+```
+
+The CFG for the main function is, once again, very large, so I recommend you avoid graph mode. We can see from scrolling through the function in visual mode that again it gets user input from stdin, calls `sym.complex_function`, and then there is a large branching structure with various success/fail prints. Without investigating much futher, we already know we want it to print "Good Job.", so let's try exploring until we find that. First though, let's add hooks to all functions that print a debug statement so we can trace what's happening during exploration. We can add the hooks as shown below.
+
+```
+[0x08048778]> Mhf
 [R2ANGR] Importing angr
 [R2ANGR] Loading r2angr
 [R2ANGR] Initialized r2angr at entry point
-Getting help
-| Mc[?]                 Continue emulation
-| Me[?]                 Explore using find/avoid comments
-| Mi[?]                 Initialize at entry point
-| Ms[?]                 States list
-| Mh[?]                 Hooks
-| Mw[?] <addr>          Add a watchpoint
-[0x00400610]>
+[HOOKS] Hooking function: entry0 at 0x8048450
+[HOOKS] Hooking import: sym.imp.__libc_start_main at 0x8048420
+[HOOKS] Hooking function: sym.deregister_tm_clones at 0x8048490
+[HOOKS] Hooking function: sym.register_tm_clones at 0x80484c0
+[HOOKS] Hooking function: sym.__do_global_dtors_aux at 0x8048500
+[HOOKS] Hooking function: entry.init0 at 0x8048520
+[HOOKS] Hooking function: sym.__libc_csu_fini at 0x804d2f0
+[HOOKS] Hooking function: sym.__x86.get_pc_thunk.bx at 0x8048480
+[HOOKS] Hooking function: sym.complex_function at 0x8048569
+[HOOKS] Hooking function: sym._fini at 0x804d2f4
+[HOOKS] Hooking function: sym.__libc_csu_init at 0x804d290
+[HOOKS] Hooking function: main at 0x80485c8
+[HOOKS] Hooking function: sym.print_msg at 0x804854b
+[HOOKS] Hooking import: sym.imp.printf at 0x80483e0
+[HOOKS] Hooking function: sym._init at 0x8048394
+[HOOKS] Hooking import: sym.imp.strcmp at 0x80483d0
+[HOOKS] Hooking import: sym.imp.__stack_chk_fail at 0x80483f0
+[HOOKS] Hooking import: sym.imp.puts at 0x8048400
+[HOOKS] Hooking import: sym.imp.exit at 0x8048410
+[HOOKS] Hooking import: sym.imp.__isoc99_scanf at 0x8048430
+[0x08048450]> 
 ```
 
-The first time you run a modality command, it will take a few seconds to load angr, and automatically initialize the project at the entry point. Next, we'll list the commands relevant to emulation with `Me?`.
+Then we can explore until a state has "Good Job" in stdout as shown below.
 
-```text
-[0x00400610]> Me?
-Getting help
-| Me[?]                 Explore using find/avoid comments
-| Meu <addr>            Explore until address
-[0x00400610]>
 ```
-
-We'll use the `Meu` command to explore until one of the simulation manager states hits the main function.
-
-```text
-[0x00400610]> Meu main
-[DEBUG] Starting exploration. Find: [0x4007e8]
+[0x08048450]> Meo Good Job
+[DEBUG] Starting exploration. Find: [Good Job]
+[HOOKS] Called entry0 ();
+[HOOKS] Called int sym.imp.__libc_start_main (func main, int argc, char **ubp_av, func init, func fini, func rtld_fini, void *stack_end);
+[HOOKS] Called sym.__libc_csu_init (int32_t arg_4h, int32_t arg_8h);
+WARNING | 2020-06-15 17:42:39,342 | angr.state_plugins.symbolic_memory | The program is accessing memory or registers with an unspecified value. This could indicate unwanted behavior.
+WARNING | 2020-06-15 17:42:39,342 | angr.state_plugins.symbolic_memory | angr will cope with this by generating an unconstrained symbolic variable and continuing. You can resolve this by:
+WARNING | 2020-06-15 17:42:39,342 | angr.state_plugins.symbolic_memory | 1) setting a value to the initial state
+WARNING | 2020-06-15 17:42:39,342 | angr.state_plugins.symbolic_memory | 2) adding the state option ZERO_FILL_UNCONSTRAINED_{MEMORY,REGISTERS}, to make unknown regions hold null
+WARNING | 2020-06-15 17:42:39,342 | angr.state_plugins.symbolic_memory | 3) adding the state option SYMBOL_FILL_UNCONSTRAINED_{MEMORY_REGISTERS}, to suppress these messages.
+WARNING | 2020-06-15 17:42:39,342 | angr.state_plugins.symbolic_memory | Filling register edi with 4 unconstrained bytes referenced from 0x804d291 (__libc_csu_init+0x1 in 02_angr_find_condition (0x804d291))
+WARNING | 2020-06-15 17:42:39,344 | angr.state_plugins.symbolic_memory | Filling register ebx with 4 unconstrained bytes referenced from 0x804d293 (__libc_csu_init+0x3 in 02_angr_find_condition (0x804d293))
+[HOOKS] Called sym.__x86.get_pc_thunk.bx ();
+[HOOKS] Called sym._init ();
+[HOOKS] Called sym.__x86.get_pc_thunk.bx ();
+[HOOKS] Called entry.init0 ();
+[HOOKS] Called sym.register_tm_clones ();
+[HOOKS] Called int main (int argc, char **argv, char **envp);
+[HOOKS] Called sym.print_msg ();
+[HOOKS] Called int sym.imp.printf (const char *format);
+WARNING | 2020-06-15 17:42:39,838 | angr.state_plugins.symbolic_memory | Filling memory at 0x804f040 with 240 unconstrained bytes referenced from 0x90512d0 (printf+0x0 in libc.so.6 (0x512d0))
+[HOOKS] Called int sym.imp.printf (const char *format);
+[HOOKS] Called int sym.imp.__isoc99_scanf (const char *format);
+[HOOKS] Called sym.complex_function (int32_t arg_8h, int32_t arg_ch);
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called sym.complex_function (int32_t arg_8h, int32_t arg_ch);
+[HOOKS] Called void sym.imp.exit (int status);
+[HOOKS] Called void sym.imp.exit (int status);
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called sym.complex_function (int32_t arg_8h, int32_t arg_ch);
+[HOOKS] Called void sym.imp.exit (int status);
+[HOOKS] Called void sym.imp.exit (int status);
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called sym.complex_function (int32_t arg_8h, int32_t arg_ch);
+[HOOKS] Called void sym.imp.exit (int status);
+[HOOKS] Called void sym.imp.exit (int status);
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called sym.complex_function (int32_t arg_8h, int32_t arg_ch);
+[HOOKS] Called void sym.imp.exit (int status);
+[HOOKS] Called void sym.imp.exit (int status);
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called sym.complex_function (int32_t arg_8h, int32_t arg_ch);
+[HOOKS] Called void sym.imp.exit (int status);
+[HOOKS] Called void sym.imp.exit (int status);
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called sym.complex_function (int32_t arg_8h, int32_t arg_ch);
+[HOOKS] Called void sym.imp.exit (int status);
+[HOOKS] Called void sym.imp.exit (int status);
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called sym.complex_function (int32_t arg_8h, int32_t arg_ch);
+[HOOKS] Called void sym.imp.exit (int status);
+[HOOKS] Called void sym.imp.exit (int status);
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called void sym.imp.exit (int status);
+[HOOKS] Called void sym.imp.exit (int status);
+[HOOKS] Called int sym.imp.strcmp (const char *s1, const char *s2);
+WARNING | 2020-06-15 17:42:41,897 | angr.state_plugins.symbolic_memory | Filling memory at 0x7ffefffc with 72 unconstrained bytes referenced from 0x907e300 (strcmp+0x0 in libc.so.6 (0x7e300))
+WARNING | 2020-06-15 17:42:41,898 | angr.state_plugins.symbolic_memory | Filling memory at 0x7ffeff70 with 4 unconstrained bytes referenced from 0x907e300 (strcmp+0x0 in libc.so.6 (0x7e300))
+WARNING | 2020-06-15 17:42:41,898 | angr.state_plugins.symbolic_memory | Filling memory at 0x7ffeff4d with 11 unconstrained bytes referenced from 0x907e300 (strcmp+0x0 in libc.so.6 (0x7e300))
+WARNING | 2020-06-15 17:42:41,910 | angr.state_plugins.symbolic_memory | Filling memory at 0x7fff0044 with 20 unconstrained bytes referenced from 0x907e300 (strcmp+0x0 in libc.so.6 (0x7e300))
+[HOOKS] Called int sym.imp.puts (const char *s);
+[HOOKS] Called int sym.imp.puts (const char *s);
 [DEBUG] Found 1 solutions
-[0x004007e8]>
+[0x080495d8]> 
 ```
 
-As we can see, one of our states found the main function. We can list all the active states with `Msl`.
+Our hooks give us some idea of what was happening during this exploration. We can then list the remaining states with the `Msl` command.
 
-```text
-[0x004007e8]> Msl
-Active states:
-  0 0x4007e4
-  1 0x4007e4
-  2 0x4007e8
-
-[0x004007e8]>
 ```
-
-Since we only care about the state at `0x4007e8`, we can kill the states at `0x4007e4` with the `Msk` command \(to kill a single state\) or the `Mse` command \(to extract a single state and kill all the others\).
-
-```text
-[0x004007e8]> Mse 2
-[0x004007e8]> Msl
+[0x080495d8]> Msl
 Active states:
-  0 0x4007e8
+  0 0x804d26c
+  1 0x80495d8
 
 Deadended states:
-  0 0x4007e4
-  1 0x4007e4
+  0 0x90303d0
+  1 0x90303d0
+  2 0x90303d0
+  3 0x90303d0
+  4 0x90303d0
+  5 0x90303d0
+  6 0x90303d0
+  7 0x90303d0
+  8 0x90303d0
+  9 0x90303d0
+  10 0x90303d0
+  11 0x90303d0
+  12 0x90303d0
+  13 0x90303d0
+  14 0x90303d0
+  15 0x90303d0
 ```
 
-This binary contains a success/fail condition. We want to know the input that produces the success condition. We can explore to this branch as shown below.
+We have two active states, let's see what is in stdout for each one using the `Mso` command.
 
-```text
-[0x004007e8]> Meu 0x00400844
-[DEBUG] Starting exploration. Find: [0x400844]
-[DEBUG] Found 1 solutions
-[0x00400844]>
+```
+[0x080495d8]> Mso
+Active state 0 at 0x804d26c:
+placeholder
+Enter the password: Try again.
+
+Active state 1 at 0x80495d8:
+placeholder
+Enter the password: Good Job.
+
+[0x080495d8]> 
 ```
 
-We can then list the stdin for all active states with `Msi`.
+Looks like the first one failed, we'll kill it with the `Msk` command.
 
-```text
-[0x00400844]> Msi
-Active state 0 at 0x4005a0:
-b'Code_Talker\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\x00'
-Active state 1 at 0x40085f:
-b'Code_Talke\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\x00'
-Active state 2 at 0x40087f:
-b'Code_Talk\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\x00'
-Active state 3 at 0x4000050:
-b'Code_Tal\xf5\xe5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\xf5\x00'
-Active state 4 at 0x400844:
-b'Code_Talkers\xf5\xf5\xf5\xf5\xf5\xf5\xf5\x00'
+```
+[0x080495d8]> Msk 0
+[0x080495d8]> 
 ```
 
-Since the state we acare about is at `0x400844`, we know our password is "Code\_Talkers". To explain a variety of features we took a long way to solve this challenge, it could be solved quicker by opening r2 and using the one liner below.
+Now we'll list the stdin for the final state as shown below.
 
-```text
-[0x00400610]> aa;Meu 0x400844;Mse 0x400844;Msi
-[x] Analyze all flags starting with sym. and entry0 (aa)
-[R2ANGR] Importing angr
-[R2ANGR] Loading r2angr
-[R2ANGR] Initialized r2angr at entry point
-[DEBUG] Starting exploration. Find: [0x400844]
-[DEBUG] Found 1 solutions
-Active state 0 at 0x400844:
-b'Code_Talkers\xf5\xf5\xf5\xf5\xf5\xf5\xf5\x00'
-[0x00400844]>
+```
+[0x080495d8]> Msi
+Active state 0 at 0x80495d8:
+UFOHHURD
+[0x080495d8]> 
 ```
 
+Let's try this password on the binary.
+
+```
+[0x080495d8]> q
+chase@chase:~/github/r2angr/docs/challenges$ ./02_angr_find_condition 
+placeholder
+Enter the password: UFOHHURD
+Good Job.
+chase@chase:~/github/r2angr/docs/challenges$ 
+```
