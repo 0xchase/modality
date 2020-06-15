@@ -22,8 +22,8 @@
 * [Visualization](visualization.md)
 
 ## Tutorials
-* [Basic Exploration](angrctf0.md)
-* [Finding and Avoiding](angrctf1.md)
-* [Finding Output](angrctf2.md)
-* [Working with bitvectors](angrctf3.md)
+* [Basic Exploration](tutorial1.md)
+* [Finding and Avoiding](tutorial2.md)
+* [Finding Output](tutorial3.md)
+* [Working with bitvectors](tutorial4.md)
 
