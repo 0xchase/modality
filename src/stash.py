@@ -1,5 +1,5 @@
-from tabulate import *
 from termcolor import colored
+import claripy
 
 # Chage commands to kill/revive state by numbers rather than addresses
 
@@ -16,13 +16,6 @@ class Stash():
 
     def list(self):
         table = []
-
-        if len(self.r2angr.simgr.found) > 0:
-            self.print_return(colored("Found", "green") + " states:")
-            for i in range(0, len(self.r2angr.simgr.found)):
-                self.print_return("  " + str(i) + " " + colored(hex(self.r2angr.simgr.found[i].addr), "yellow"))
-            self.print_return("")
-
         if len(self.r2angr.simgr.active) > 0:
             self.print_return(colored("Active", "cyan") + " states:")
             for i in range(0, len(self.r2angr.simgr.active)):
@@ -38,13 +31,18 @@ class Stash():
     def print_input(self):
         command = self.r2angr.command
         simgr = self.r2angr.simgr
+        print("Printing input")
         addr = 0
 
         if len(command) == 1:
             i = 0
-            for state in simgr.active:
-                self.print_return(colored("Active", "cyan") + " state " + str(i) + " at " + colored(hex(state.addr), "green") + ":")
-                self.print_decode(state.posix.dumps(0))
+            print("Made it here " + str(len(self.r2angr.simgr.active)))
+            for state in self.r2angr.simgr.active:
+                print(colored("Active", "cyan") + " state " + str(i) + " at " + colored(hex(state.addr), "green") + ":")
+                try:
+                    print(state.posix.dumps(0).decode())
+                except:
+                    print(state.posix.dumps(0))
                 i += 1
         elif "0x" in command[1]:
             for state in simgr.active:

@@ -7,6 +7,8 @@ from printer import *
 from hooks import *
 from util import *
 from watcher import *
+from initializer import *
+from bitvectors import *
 
 from threading import Thread
 from time import sleep
@@ -40,6 +42,8 @@ class R2ANGR():
     stash = Stash()
     watcher = Watcher()
     hooks = Hooks()
+    initializer = Initializer()
+    bitvectors = Bitvectors()
 
     return_value = ""
 
@@ -47,6 +51,8 @@ class R2ANGR():
             ("c", debugger.debug_continue,                  "c" + colored("[?]                 ", "yellow") + colored("Continue emulation", "green")),
             ("e", debugger.debug_explore,                  "e" + colored("[?]                 ", "yellow") + colored("Explore using find/avoid comments", "green")),
             ("i", None,                                     "i" + colored("[?]                 ", "yellow") + colored("Initialize at entry point", "green")),
+            ("ie", initializer.initialize_entry,                                     "ie" + colored("[?]                 ", "yellow") + colored("Initialize at entry point", "green")),
+            ("ib", initializer.initialize_blank,                                     "ib" + colored("[?]                 ", "yellow") + colored("Initialize blank state at current address", "green")),
             ("s", stash.list,                  "s" + colored("[?]                 ", "yellow") + colored("States list", "green")),
 
             ("h", None,                  "h" + colored("[?]                 ", "yellow") + colored("Hooks", "green")),
@@ -59,6 +65,7 @@ class R2ANGR():
             ("co", debugger.debug_continue_output,          "co                   " + colored("Continue emulation until output", "green")),
 
             ("eu", debugger.debug_explore_until,            "eu" + colored(" <addr>            ", "yellow") + colored("Explore until address", "green")),
+            ("eo", debugger.debug_explore_output,            "eo" + colored(" <string>          ", "yellow") + colored("Explore until string is in stdout", "green")),
 
             ("sl", stash.list,                              "sl"+colored(" <index>           ", "yellow") + colored("List states", "green")),
             ("slv", stash.info,                              "slv"+colored("                  ", "yellow") + colored("List active state verbose", "green")),
@@ -68,7 +75,9 @@ class R2ANGR():
             ("ska", stash.kill_all,                              "ska"+colored("                  ", "yellow") + colored("Kill all states", "green")),
             ("sr", stash.revive,                  "sr" + colored("[?] <index|addr>   ", "yellow") + colored("Revive state by index or address", "green")),
             ("sra", stash.revive_all,                              "sra"+colored("                  ", "yellow") + colored("Revive all states", "green")),
-            ("ss", stash.seek,                              "ss"+colored(" <index>           ", "yellow") + colored("Seek to state by index", "green")),
+            ("ss", None,                  "ss" + colored("[?] <index|addr>   ", "yellow") + colored("", "green")),
+            ("br", bitvectors.symbolize_register,                  "br" + colored("                    ", "yellow") + colored("Symbolize register with a bitvector", "green")),
+            ("bs", bitvectors.solve,                  "bs" + colored("                    ", "yellow") + colored("Solve all bitvector values", "green")),
             ("se", stash.extract,                              "se"+colored(" <index|addr>      ", "yellow") + colored("Extract single state and kill all others", "green")),
 
             ("w", watcher.add_watchpoint,                              "w"+colored("[?] <addr>          ", "yellow") + colored("Add a watchpoint", "green")),
@@ -88,7 +97,12 @@ class R2ANGR():
         self.fast_project = angr.Project(self.binary, auto_load_libs=False)
         state = self.project.factory.entry_state(args=self.argv, stdin=self.stdin)
         self.simgr = self.project.factory.simgr(state)
-        self.r2p.cmd("s " + hex(state.solver.eval(state.regs.rip)))
+
+        try:
+            self.r2p.cmd("s " + hex(state.solver.eval(state.regs.rip)))
+        except:
+            self.r2p.cmd("s " + hex(state.solver.eval(state.regs.eip)))
+
         print(colored("[", "yellow") + colored("R2ANGR", "green") + colored("] ", "yellow") + colored("Initialized r2angr at entry point", "yellow"))
 
     def initialize_entry(self):
@@ -107,7 +121,7 @@ class R2ANGR():
     def run(self, command):
         command = command.split(" ")
 
-        if "i" == command[0]:
+        if "i" == command[0] and False:
             self.initialize_entry()
             self.is_initialized = True
             return
@@ -117,6 +131,8 @@ class R2ANGR():
         self.stash.r2angr = self
         self.watcher.r2angr = self
         self.hooks.r2angr = self
+        self.initializer.r2angr = self
+        self.bitvectors.r2angr = self
 
         found = False
         for c, f, h in self.commands:

@@ -100,7 +100,7 @@ This project intends to
 
 ---
 
-### Short Tutorial
+## Short Tutorial
 
 First we'll open one of the example binaries in radare2 and display the help with the `M?` command.
 
