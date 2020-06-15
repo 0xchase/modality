@@ -5,6 +5,9 @@
 * [Installation](installation.md)
 * [Contributing](contributing.md)
 
+## References
+* [Command List](list.md)
+
 ## Features
 * [Overview](overview.md)
 * [Exploration](exploration.md)
@@ -15,6 +18,7 @@
 * [Watchpoints](watchpoints.md)
 * [Exploitation](exploitation.md)
 * [Scripting](scripting.md)
+* [Visualization](visualzation.md)
 
 ## Examples
 * [Basic Exploration](angrctf0.md)

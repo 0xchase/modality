@@ -38,7 +38,7 @@ This should all be mostly consistent with the r2cli conventions.
 
 ## Example
 
-First we'll open one of the example binaries in radare2 and display the help with the `M?` command.
+Here's an example using the r100 challenge in the challenges/ folder. First we'll open one of the example binaries in radare2 and display the help with the `M?` command.
 
 ```
 shell@shell:~/$ r2 challenges/r100 
