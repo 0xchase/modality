@@ -6,6 +6,7 @@
 
 ## References
 * [Command List](list.md)
+* [Features](features.md)
 
 ## Features
 * [Overview](overview.md)
