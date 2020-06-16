@@ -18,7 +18,7 @@ This project is mid-development so bugs and missing features are expected. The t
 
 This project intends to
  - Better integrate symbolic execution with the rest of the reverse engineering process
- - Provide a faster alternative to using angr than the python bindings
+ - Provide a faster alternative to using angr than writing scripts
  - Provide useful visualizations of the angr backend
  - Allow for switching between concrete and symbolic execution (this feature is coming soon)
  - Include a suite of features for vulnerability detection, exploit generation, etc (coming soon)
