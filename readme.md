@@ -14,3 +14,7 @@ This project intends to
  - Allow for switching between concrete and symbolic execution (this feature is coming soon)
  - Provide useful visualizations of the angr backend
  - Include a suite of features for vulnerability detection, exploit generation, etc (coming soon)
+
+---
+
+![](docs/preview.gif)
