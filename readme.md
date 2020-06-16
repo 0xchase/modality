@@ -23,3 +23,7 @@ This project intends to
  - Allow for switching between concrete and symbolic execution (this feature is coming soon)
  - Include a suite of features for vulnerability detection, exploit generation, etc (coming soon)
 
+
+---
+
+*Contact me at chasekanipe [at] gmail [dot] com*
