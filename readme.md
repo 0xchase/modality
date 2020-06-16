@@ -14,7 +14,7 @@ This project is still in development so bugs and missing features are expected. 
 
 ---
 
-### Goals
+## Goals
 
 This project intends to
  - Better integrate symbolic execution with the rest of the reverse engineering process
