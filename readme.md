@@ -6,7 +6,9 @@ A radare2 plugin to quickly perform symbolic execution inside radare2 with angr.
 
 This project is still in development so bugs and missing features are expected. The tool is partially [documented](https://chasekanipe.gitbook.io/modality/) via gitbooks.
 
-<div style="text-align:center"><img src="docs/preview.gif" /></div>
+<p align="center">
+  <img src="docs/preview.gif" />
+</p>
 
 ---
 
