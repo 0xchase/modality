@@ -6,6 +6,10 @@ A radare2 plugin to quickly perform symbolic execution inside radare2 with angr.
 
 This project is still in development so bugs and missing features are expected. The tool is partially [documented](https://chasekanipe.gitbook.io/modality/) via gitbooks.
 
+![](docs/preview.gif)
+
+---
+
 ### Goals
 
 This project intends to
@@ -15,6 +19,3 @@ This project intends to
  - Provide useful visualizations of the angr backend
  - Include a suite of features for vulnerability detection, exploit generation, etc (coming soon)
 
----
-
-![](docs/preview.gif)
