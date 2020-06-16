@@ -4,7 +4,7 @@ A **radare2** plugin to integrate the symbolic execution capabilities of **angr*
 
 ---
 
-This project is mid-development so bugs and missing features are expected. The tool has partial gitbook [documentation](https://chasekanipe.gitbook.io/modality/) in addition to several [video tutorials](https://www.youtube.com/playlist?list=PL5k2-CzbGSTRkCp7_L4RRudVaIVdKx3pT).
+This project is mid-development so bugs and missing features are expected. The tool has partial gitbook [documentation](https://chasekanipe.gitbook.io/modality/) in addition to several introductory [video tutorials](https://www.youtube.com/playlist?list=PL5k2-CzbGSTRkCp7_L4RRudVaIVdKx3pT).
 
 <br>
 
