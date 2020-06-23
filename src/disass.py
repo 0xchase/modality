@@ -1,5 +1,5 @@
 import r2pipe
-from tabulate import *
+#from tabulate import *
 
 class Disassembler():
     def __init__(self, filename):

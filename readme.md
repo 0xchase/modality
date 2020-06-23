@@ -14,6 +14,27 @@ This project is mid-development so bugs and missing features are expected. The t
 
 ---
 
+## Installation
+First install the python prerequisites
+
+```
+pip3 install angr termcolor
+```
+
+Then install r2lang
+
+```
+r2pm -i lang-python
+```
+
+Then install modality
+
+```
+r2pm -i modality
+```
+
+---
+
 ## Goals
 
 This project intends to
