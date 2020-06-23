@@ -33,6 +33,8 @@ Then install modality
 r2pm -i modality
 ```
 
+If you have install issues feel free to create a git issue.
+
 ---
 
 ## Goals
