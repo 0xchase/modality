@@ -2,7 +2,7 @@
 # Copyright (C) 2017 Chase Kanipe
 
 """
-r2angr
+modality
 """
 
 import r2lang
@@ -14,11 +14,10 @@ r = r2pipe.open()
 session = None
 initialized = False
 
-def r2angr(_):
+def modality(_):
     global session
     global initialized
 
-    binary = r.cmdj("ij")["core"]["file"]
 
     def process(command):
         global session
@@ -26,6 +25,8 @@ def r2angr(_):
 
         if not command.startswith("M"):
             return 0
+
+        binary = r.cmd("i~file").split("\n")[0].split(" ")[-1]
 
         if not initialized:
             sys.path.append("src/")
@@ -53,7 +54,5 @@ def r2angr(_):
             "desc": "Integrates angr with radare2",
             "call": process}
 
-# Register the plugin
-if not r2lang.plugin("core", r2angr):
-    print("An error occurred while registering r2angr")
-
+if not r2lang.plugin("core", modality):
+    print("An error occurred while registering modality")
