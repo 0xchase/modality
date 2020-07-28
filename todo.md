@@ -1,10 +1,13 @@
 # Todo
 
 ## Immediatley
- - Array of tuples for names and bitvectors. Constrain all of them, use any of them for shellcode/exploitation.
+ - After vulnerable state found:
+   - Attempt to automatically detect payload type (aslr and dep off)
+   - Have commands for dumping various payload types
  - Payload: execute custom function, put in custom shellcode, angrop
  - Commands to run with previously generated shellcodes... in shell, in angr, in radare2, to network address and port
  - Jump to shellcode
+ - Array of tuples for names and bitvectors. Constrain all of them, use any of them for shellcode/exploitation.
  - Integrate R2ConcreteTarget()
  - Deal with PIC
  - Speed up bitvector constraining, do it in groups of four/eight, on failure, individual constraints.
@@ -37,3 +40,4 @@
 ## Other
  - state.options.add(angr.options.BYPASS_UNSUPPORTED_SYSCALL)
  - Fancy shellcode printing format like "\x41"*80 + {shellcode} + "\x42"*8 (pc overwrite)
+

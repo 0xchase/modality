@@ -16,6 +16,9 @@ from exploit import *
 from threading import Thread
 from time import sleep
 
+#if not hasattr(sys, 'argv'):
+#    sys.argv = ['']
+
 # Add command to access old mounting commands
 # Add all old commands. Go through each, making sure it works. Make commands robust.
 # Add load commands (load registers, stack, etc) from debug session
@@ -88,6 +91,8 @@ class R2ANGR():
             ("wl", watcher.list_watchpoints,                              "wl"+colored("                   ", "yellow") + colored("List watchpoint", "green")),
             ("wr", watcher.remove_watchpoint,                              "wr"+colored(" <addr>            ", "yellow") + colored("Remove watchpoint", "green")),
             ("E", exploiter.explore,                              "E"+colored("                   ", "yellow") + colored("Run the exploit main command", "green")),
+            ("Er", exploiter.test_run,                              "Et"+colored("                   ", "yellow") + colored("Run binary using stdin payload", "green")),
+            ("Ed", exploiter.test_debug,                              "Et"+colored("                   ", "yellow") + colored("Test binary using stdin payload", "green")),
     ]
 
     def load_angr(self):

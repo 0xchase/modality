@@ -1,0 +1,3 @@
+#!/usr/bin/rarun2
+program=binary
+stdin=.buffer.txt
