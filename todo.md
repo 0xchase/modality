@@ -1,9 +1,13 @@
 # Todo
 
 ## Immediatley
- - Move exploit.py into modality code
+ - Array of tuples for names and bitvectors. Constrain all of them, use any of them for shellcode/exploitation.
+ - Payload: execute custom function, put in custom shellcode, angrop
+ - Commands to run with previously generated shellcodes... in shell, in angr, in radare2, to network address and port
+ - Jump to shellcode
  - Integrate R2ConcreteTarget()
  - Deal with PIC
+ - Speed up bitvector constraining, do it in groups of four/eight, on failure, individual constraints.
 
 ## General
  - Interactive exploration mode: steps until state increase, user chooses left or right
@@ -11,11 +15,10 @@
  - On shellcode buffer, attempt to constraint each byte to \x41
 
 ## Vulnerability Detection
- - Explore for unconstrained state
- - Explore for unconstrained value in call to system()
  - Detect format strings
  - Hook strcpy, check length of buffer, iterate over stack looking for unconstrained values, check if there's overlap
  - Detect use-after-free, double-free: https://github.com/angr/angr/issues/478
+ - Check if any heap reads contain particular pattern to recognize heap overflows
 
 ### Testing
  - Test on the Juliet test cases (118 different CWE, 64,099 test cases). https://samate.nist.gov/SRD/testsuite.php
@@ -30,7 +33,6 @@
  - Fancy shellcode printer
    - Prints shellcode in a colored way labelling the length of each section
  - Solve every exploit-exercises challenge in < 15 seconds. Show video of this solving. Show video of solving previous r2con challenges.
-
 
 ## Other
  - state.options.add(angr.options.BYPASS_UNSUPPORTED_SYSCALL)

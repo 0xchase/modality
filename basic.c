@@ -16,3 +16,7 @@ int main() {
 
 	return 0;
 }
+
+void yeet() {
+	printf("YOU WIN THIS CHALLENGE");
+}
