@@ -14,8 +14,10 @@ class hook_printf(angr.procedures.libc.printf.printf):
         return super(type(self), self).run()
 
 class hook_scanf(angr.procedures.libc.scanf.scanf):
+    hit = False
 
     def run(self, fmt):
+        hit = True
         print("Hooked scanf at " + hex(self.addr) + " with format string " + str(fmt))
         return super(type(self), self).run(fmt)
 
@@ -50,12 +52,20 @@ def exploitFinder():
 
     p = angr.Project("basic", load_options={"auto_load_libs": False})
 
-    p.hook_symbol("printf", hook_printf())
-    p.hook_symbol("__isoc99_scanf", hook_scanf())
+    hook = hook_scanf()
+
+    #p.hook_symbol("printf", hook_printf())
+    #p.hook_symbol("__isoc99_scanf", hook)
 
     stdin = claripy.BVS("stdin", 300*8)
     state = p.factory.entry_state(stdin=stdin);
     simgr = p.factory.simgr(state, save_unconstrained=True);
+
+    while len(simgr.active) > 0:
+        print(list(simgr.active[0].memory.addrs_for_name("stdin")))
+        simgr.step()
+    
+    return
 
     go = True
     while len(simgr.active) > 0:
@@ -82,6 +92,8 @@ def exploitFinder():
                         state_copy.add_constraints(constraint)
 
                 print("Vulnerable path found:\n")
+
+                print(str(list(s.memory.addrs_for_name("stdin"))))
 
                 stdin_shellcode = state_copy.posix.dumps(0)
 

@@ -130,7 +130,7 @@ class R2ANGR():
         print(colored("[", "yellow") + colored("R2ANGR", "green") + colored("] ", "yellow") + colored("Initialized r2angr at entry point", "yellow"))
 
     def __init__(self, binary, r2p):
-        self.stdin = claripy.BVS("stdin", 300*8)
+        self.stdin = claripy.BVS("stdin", 150*8)
         self.binary = binary
         self.r2p = r2p
 
