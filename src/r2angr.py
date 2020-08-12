@@ -60,6 +60,7 @@ class R2ANGR():
             ("i", None,                                     "i" + colored("[?]                 ", "yellow") + colored("Initialize at entry point", "green")),
             ("ie", initializer.initialize_entry,                                     "ie" + colored("[?]                 ", "yellow") + colored("Initialize at entry point", "green")),
             ("ib", initializer.initialize_blank,                                     "ib" + colored("[?]                 ", "yellow") + colored("Initialize blank state at current address", "green")),
+            ("id", initializer.initialize_debugger,                                     "id" + colored("[?]                 ", "yellow") + colored("Create angr state from current debugger state", "green")),
             ("s", stash.list,                  "s" + colored("[?]                 ", "yellow") + colored("States list", "green")),
 
             ("h", None,                  "h" + colored("[?]                 ", "yellow") + colored("Hooks", "green")),

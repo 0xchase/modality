@@ -1,9 +1,6 @@
 # Todo
 
 ## Immediatley
- - After vulnerable state found:
-   - Attempt to automatically detect payload type (aslr and dep off)
-   - Have commands for dumping various payload types
  - Payload: execute custom function, put in custom shellcode, angrop
  - Commands to run with previously generated shellcodes... in shell, in angr, in radare2, to network address and port
  - Jump to shellcode
@@ -16,6 +13,7 @@
  - Interactive exploration mode: steps until state increase, user chooses left or right
  - Many hooks for standard functions like scanf, print arguments in nice format
  - On shellcode buffer, attempt to constraint each byte to \x41
+ - Super nice visualization of shellcode construction
 
 ## Vulnerability Detection
  - Detect format strings
