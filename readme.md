@@ -1,4 +1,4 @@
-# Modality <img src="docs/logo.png" align="right" alt="logo" width="240">
+# modality <img src="docs/logo.png" align="right" alt="logo" width="240">
 
 A **radare2** plugin to integrate the symbolic execution capabilities of **angr**. 
 
