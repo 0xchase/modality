@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+from src.concrete.target import R2ConcreteTarget
+
 from debug import *
 from stash import *
 from disass import *
@@ -9,9 +11,13 @@ from util import *
 from watcher import *
 from initializer import *
 from bitvectors import *
+from exploit import *
 
 from threading import Thread
 from time import sleep
+
+#if not hasattr(sys, 'argv'):
+#    sys.argv = ['']
 
 # Add command to access old mounting commands
 # Add all old commands. Go through each, making sure it works. Make commands robust.
@@ -44,6 +50,7 @@ class R2ANGR():
     hooks = Hooks()
     initializer = Initializer()
     bitvectors = Bitvectors()
+    exploiter = Exploiter()
 
     return_value = ""
 
@@ -53,6 +60,7 @@ class R2ANGR():
             ("i", None,                                     "i" + colored("[?]                 ", "yellow") + colored("Initialize at entry point", "green")),
             ("ie", initializer.initialize_entry,                                     "ie" + colored("[?]                 ", "yellow") + colored("Initialize at entry point", "green")),
             ("ib", initializer.initialize_blank,                                     "ib" + colored("[?]                 ", "yellow") + colored("Initialize blank state at current address", "green")),
+            ("id", initializer.initialize_debugger,                                     "id" + colored("[?]                 ", "yellow") + colored("Create angr state from current debugger state", "green")),
             ("s", stash.list,                  "s" + colored("[?]                 ", "yellow") + colored("States list", "green")),
 
             ("h", None,                  "h" + colored("[?]                 ", "yellow") + colored("Hooks", "green")),
@@ -83,6 +91,7 @@ class R2ANGR():
             ("w", watcher.add_watchpoint,                              "w"+colored("[?] <addr>          ", "yellow") + colored("Add a watchpoint", "green")),
             ("wl", watcher.list_watchpoints,                              "wl"+colored("                   ", "yellow") + colored("List watchpoint", "green")),
             ("wr", watcher.remove_watchpoint,                              "wr"+colored(" <addr>            ", "yellow") + colored("Remove watchpoint", "green")),
+            ("E", exploiter.explore,                              "E"+colored("                   ", "yellow") + colored("Run the exploit main command", "green")),
     ]
 
     def load_angr(self):
@@ -93,10 +102,23 @@ class R2ANGR():
         print(colored("[", "yellow") + colored("R2ANGR", "green") + colored("] ", "yellow") + colored("Loading r2angr", "yellow"))
         self.is_initialized = True
 
-        self.project = angr.Project(self.binary)
-        self.fast_project = angr.Project(self.binary, auto_load_libs=False)
+        if False:
+            self.concrete_target = R2ConcreteTarget(self.r2p)
+            self.project = angr.Project(self.binary, concrete_target = self.concrete_target)
+            self.fast_project = angr.Project(self.binary, concrete_target=self.concrete_target, auto_load_libs=False)
+        else:
+            self.project = angr.Project(self.binary)
+            self.fast_project = angr.Project(self.binary, auto_load_libs=False)
+
+        self.initialize_entry()
+
+    def initialize_entry(self):
         state = self.project.factory.entry_state(args=self.argv, stdin=self.stdin)
-        self.simgr = self.project.factory.simgr(state)
+
+        #state.options.add(self.angr.options.SYMBION_SYNC_CLE)
+        #state.options.add(self.angr.options.SYMBION_KEEP_STUBS_ON_SYNC)
+
+        self.simgr = self.project.factory.simgr(state, save_unconstrained=True)
 
         try:
             self.r2p.cmd("s " + hex(state.solver.eval(state.regs.rip)))
@@ -105,16 +127,8 @@ class R2ANGR():
 
         print(colored("[", "yellow") + colored("R2ANGR", "green") + colored("] ", "yellow") + colored("Initialized r2angr at entry point", "yellow"))
 
-    def initialize_entry(self):
-        self.project = self.angr.Project(self.binary)
-        self.fast_project = self.angr.Project(self.binary, auto_load_libs=False)
-        state = self.project.factory.entry_state(args=self.argv, stdin=self.stdin)
-        self.simgr = self.project.factory.simgr(state)
-        self.r2p.cmd("s " + hex(state.solver.eval(state.regs.rip)))
-        print(colored("[", "yellow") + colored("R2ANGR", "green") + colored("] ", "yellow") + colored("Initialized r2angr at entry point", "yellow"))
-
     def __init__(self, binary, r2p):
-        self.stdin = claripy.BVS("stdin", 20*8)
+        self.stdin = claripy.BVS("stdin", 150*8)
         self.binary = binary
         self.r2p = r2p
 
@@ -133,6 +147,7 @@ class R2ANGR():
         self.hooks.r2angr = self
         self.initializer.r2angr = self
         self.bitvectors.r2angr = self
+        self.exploiter.r2angr = self
 
         found = False
         for c, f, h in self.commands:

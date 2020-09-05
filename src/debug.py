@@ -395,7 +395,6 @@ class Debugger():
         while len(self.r2angr.simgr.active) <= current and len(self.r2angr.simgr.active) > 0:
             self.r2angr.simgr.step()
 
-
     def debug_continue_until_ret(self):
         print("Debug continue until ret")
         self.simgr.run()
