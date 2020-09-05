@@ -92,8 +92,6 @@ class R2ANGR():
             ("wl", watcher.list_watchpoints,                              "wl"+colored("                   ", "yellow") + colored("List watchpoint", "green")),
             ("wr", watcher.remove_watchpoint,                              "wr"+colored(" <addr>            ", "yellow") + colored("Remove watchpoint", "green")),
             ("E", exploiter.explore,                              "E"+colored("                   ", "yellow") + colored("Run the exploit main command", "green")),
-            ("Er", exploiter.test_run,                              "Et"+colored("                   ", "yellow") + colored("Run binary using stdin payload", "green")),
-            ("Ed", exploiter.test_debug,                              "Et"+colored("                   ", "yellow") + colored("Test binary using stdin payload", "green")),
     ]
 
     def load_angr(self):
@@ -104,7 +102,6 @@ class R2ANGR():
         print(colored("[", "yellow") + colored("R2ANGR", "green") + colored("] ", "yellow") + colored("Loading r2angr", "yellow"))
         self.is_initialized = True
 
-        # Combine this with self.initialize_entry()
         if False:
             self.concrete_target = R2ConcreteTarget(self.r2p)
             self.project = angr.Project(self.binary, concrete_target = self.concrete_target)
