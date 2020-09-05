@@ -39,7 +39,11 @@ Copy the top level script to the plugins folder.
 cp .local/share/radare2/r2pm/git/modality/plugin.py .local/share/radare2/plugins/modality.py
 ```
 
+Then add the following lines to your .bashrc.
 
+```
+export PYTHONPATH=~/.local/share/radare2/r2pm/git/modality/:~/.local/share/radare2/r2pm/git/modality/src:
+```
 
 If you have installation issues feel free to create a git issue.
 
