@@ -4,7 +4,7 @@ A **radare2** plugin to integrate the symbolic execution capabilities of **angr*
 
 ---
 
-This project is mid-development so bugs and missing features are expected. The tool has partial gitbook [documentation](https://chasekanipe.gitbook.io/modality/) in addition to several introductory [video tutorials](https://www.youtube.com/playlist?list=PL5k2-CzbGSTRkCp7_L4RRudVaIVdKx3pT).
+This project is *mid-development so bugs and missing features are expected*. The tool has partial gitbook [documentation](https://chasekanipe.gitbook.io/modality/). 
 
 <br>
 
@@ -45,7 +45,7 @@ Then add the following lines to your .bashrc.
 export PYTHONPATH=~/.local/share/radare2/r2pm/git/modality/:~/.local/share/radare2/r2pm/git/modality/src:
 ```
 
-If you have installation issues feel free to create a git issue.
+The tool has only been tested on Ubuntu 20.04 (so far). If you have installation issues feel free to create a git issue.
 
 ---
 
