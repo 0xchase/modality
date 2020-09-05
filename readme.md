@@ -14,11 +14,11 @@ This project is mid-development so bugs and missing features are expected. The t
 
 ---
 
-## Installation
+## Installation (Manual)
 First install the python prerequisites
 
 ```
-pip3 install angr termcolor
+pip3 install angr termcolor r2pipe angrdbg cooldict
 ```
 
 Then install r2lang
@@ -27,11 +27,19 @@ Then install r2lang
 r2pm -i lang-python
 ```
 
-Then install modality
+Then clone the modality repo into the r2pm git folder.
 
 ```
-r2pm -i modality
+git clone https://github.com/0xchase/modality .local/share/radare2/r2pm/git/modality
 ```
+
+Copy the top level script to the plugins folder.
+
+```
+cp .local/share/radare2/r2pm/git/modality/plugin.py .local/share/radare2/plugins/modality.py
+```
+
+
 
 If you have installation issues feel free to create a git issue.
 
